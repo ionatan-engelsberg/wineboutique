@@ -16,6 +16,10 @@ export const { PORT } = process.env;
 
 export const { JWT_SECRET, JWT_LIFETIME } = process.env;
 
+export const { COOKIE_SIGNATURE } = process.env;
+
+export const { CLOUDINARY_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+
 const { MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_CLUSTER } = process.env;
 
 export const MONGODB_URI = `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER}.mongodb.net/?retryWrites=true&w=majority`;

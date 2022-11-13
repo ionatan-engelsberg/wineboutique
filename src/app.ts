@@ -5,6 +5,7 @@ import { useExpressServer, useContainer } from 'routing-controllers';
 import { Container } from 'typedi';
 
 import { ErrorHandler } from './middlewares/errorHandler.middleware';
+import { TrimRequest } from './middlewares/trimRequest.middleware';
 
 // required by routing-controllers
 useContainer(Container);
@@ -15,7 +16,7 @@ const routingControllersOptions = {
   cors: true,
   defaultErrorHandler: false,
   // controllers
-  middlewares: [ErrorHandler]
+  middlewares: [ErrorHandler, TrimRequest]
   // Checkers
 };
 
