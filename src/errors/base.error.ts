@@ -18,9 +18,6 @@ export class BaseError extends Error {
   }
 }
 
-export const isBaseError = (something: any): something is BaseError =>
-  something instanceof BaseError && 'status' in something;
-
 export class UnauthorizedError extends BaseError {
   constructor(description: string, details?: any) {
     super(ErrorMessages.UNAUTHORIZED, HttpStatusCode.UNAUTHORIZED, description, details);
