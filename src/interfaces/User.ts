@@ -12,6 +12,8 @@ export interface User {
 
   birthdate: Date;
 
+  phoneNumber?: number;
+
   password: string;
 
   isVerified: boolean;

@@ -3,8 +3,9 @@ import { Service } from 'typedi';
 import { Middleware, ExpressErrorMiddlewareInterface } from 'routing-controllers';
 
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
-import { ErrorMessages } from '../constants/ErrorMessages';
+import { ErrorMessages, ErrorDescriptions, ErrorCodes } from '../constants/ErrorMessages';
 
+// TODO: Check which errors I am using
 @Middleware({ type: 'after' })
 @Service({ transient: true })
 export class ErrorHandler implements ExpressErrorMiddlewareInterface {
@@ -12,15 +13,22 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
     const { errors } = error;
 
     const status = error.status ?? error.httpCode ?? HttpStatusCode.INTERNAL_SERVER;
-    const message = error.message ?? ErrorMessages.INTERNAL_SERVER;
+    let message = error.message ?? ErrorMessages.INTERNAL_SERVER;
     let { description } = error;
     let { details } = error;
 
     // If error is validation error
+    // TODO: Better implementation
     if (errors) {
-      description =
-        'Some properties are either missing or incorrect. Check all required values are included and in a correct format';
-      details = errors[0];
+      if (errors[0].constraints) {
+        const code = errors[0].constraints.code;
+        message = ErrorMessages.BAD_REQUEST;
+        description = ErrorDescriptions[code];
+        details = [{ code }];
+      } else {
+        description = 'Class validator error. Refactor';
+        details = error[0];
+      }
     }
 
     if (error.name === 'MulterError') {

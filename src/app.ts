@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import { useExpressServer, useContainer } from 'routing-controllers';
 import { Container } from 'typedi';
 
+import { controllers } from './controllers';
 import { ErrorHandler } from './middlewares/errorHandler.middleware';
 import { TrimRequest } from './middlewares/trimRequest.middleware';
 
@@ -15,7 +16,7 @@ const app = express().use(bodyParser.json());
 const routingControllersOptions = {
   cors: true,
   defaultErrorHandler: false,
-  // controllers
+  controllers,
   middlewares: [ErrorHandler, TrimRequest]
   // Checkers
 };

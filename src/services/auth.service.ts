@@ -2,7 +2,9 @@ import { Service } from 'typedi';
 import { hashSync, genSaltSync } from 'bcrypt';
 import { randomBytes } from 'crypto';
 
-import { ConflictError } from '../errors/base.error';
+import { ConflictError, IncorrectFormatError } from '../errors/base.error';
+
+import { EmailService } from './email.service';
 
 import { UserRepository } from '../repositories/user.repository';
 
@@ -14,10 +16,14 @@ const MILISECONDS_IN_ONE_DAY = MILISECONDS_IN_ONE_HOUR * 24;
 
 @Service({ transient: true })
 export class AuthService {
-  constructor(private readonly _userRepository: UserRepository) {}
+  constructor(
+    private readonly _emailService: EmailService,
+
+    private readonly _userRepository: UserRepository
+  ) {}
 
   async signup(user: User) {
-    user.password = this.hashPassword(user.password);
+    user.password = this.hashString(user.password);
     user.verificationToken = randomBytes(40).toString('hex');
 
     const currentDate = getCurrentDate().getTime();
@@ -26,9 +32,14 @@ export class AuthService {
     user.verificationTokenExpirationDate = verificationTokenExpirationDate;
 
     user = await this.createUser(user);
+
+    user.verificationToken = this.hashString(user.verificationToken as string);
+    await this._emailService.sendVerifyAccountEmail(user);
+
+    return user;
   }
 
-  private hashPassword(password: string) {
+  private hashString(password: string) {
     const salt = genSaltSync(10);
     return hashSync(password, salt);
   }
