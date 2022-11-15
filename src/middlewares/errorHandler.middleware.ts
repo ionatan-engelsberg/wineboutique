@@ -20,14 +20,13 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
     // If error is validation error
     // TODO: Better implementation
     if (errors) {
-      if (errors[0].constraints) {
+      message = ErrorMessages.BAD_REQUEST;
+      if (errors[0].constraints.code) {
         const code = errors[0].constraints.code;
-        message = ErrorMessages.BAD_REQUEST;
         description = ErrorDescriptions[code];
         details = [{ code }];
       } else {
-        description = 'Class validator error. Refactor';
-        details = error[0];
+        description = errors[0];
       }
     }
 

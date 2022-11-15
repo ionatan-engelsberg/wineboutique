@@ -1,8 +1,10 @@
 import { Service } from 'typedi';
-import { hashSync, genSaltSync } from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 import { randomBytes } from 'crypto';
 
-import { ConflictError, IncorrectFormatError } from '../errors/base.error';
+import { JWT_LIFETIME, JWT_SECRET } from '../config/config';
+import { ConflictError, InternalServerError, NotFoundError } from '../errors/base.error';
 
 import { EmailService } from './email.service';
 
@@ -13,6 +15,7 @@ import { getCurrentDate } from '../utils/getCurrentDate';
 
 const MILISECONDS_IN_ONE_HOUR = 1000 * 60 * 60;
 const MILISECONDS_IN_ONE_DAY = MILISECONDS_IN_ONE_HOUR * 24;
+const VERIFICATION_TOKEN_VALIDATION_TIME = 30 * MILISECONDS_IN_ONE_DAY;
 
 @Service({ transient: true })
 export class AuthService {
@@ -23,17 +26,20 @@ export class AuthService {
   ) {}
 
   async signup(user: User) {
-    user.password = this.hashString(user.password);
-    user.verificationToken = randomBytes(40).toString('hex');
+    const token = randomBytes(40).toString('hex');
+    user.verificationToken = this.hashString(token as string);
 
-    const currentDate = getCurrentDate().getTime();
-    const verificationTokenExpirationTimestamp = currentDate + MILISECONDS_IN_ONE_HOUR;
+    user.password = this.hashString(user.password);
+
+    const currentTimestamp = getCurrentDate().getTime();
+    const verificationTokenExpirationTimestamp =
+      currentTimestamp + VERIFICATION_TOKEN_VALIDATION_TIME;
     const verificationTokenExpirationDate = new Date(verificationTokenExpirationTimestamp);
     user.verificationTokenExpirationDate = verificationTokenExpirationDate;
 
     user = await this.createUser(user);
 
-    user.verificationToken = this.hashString(user.verificationToken as string);
+    user.verificationToken = token;
     await this._emailService.sendVerifyAccountEmail(user);
 
     return user;
@@ -61,7 +67,7 @@ export class AuthService {
         : 1;
       const currentDate = getCurrentDate().getTime();
 
-      if (currentDate - verificationTokenExpirationTimestamp < 5 * MILISECONDS_IN_ONE_DAY) {
+      if (currentDate < verificationTokenExpirationTimestamp) {
         throw new ConflictError(`User with email ${email} already exists`, [
           { userId: existingUser._id }
         ]);
@@ -74,5 +80,47 @@ export class AuthService {
       }
       return this._userRepository.create(user);
     }
+  }
+
+  async verifyAccount(userId: string, verificationToken: string) {
+    let user: User;
+    try {
+      user = await this._userRepository.findById(userId);
+
+      const currentDate = getCurrentDate();
+      const isTokenCorrect = compareSync(verificationToken, user.verificationToken);
+      const isTokenExpired =
+        user.verificationTokenExpirationDate && currentDate > user.verificationTokenExpirationDate;
+
+      const ok = !user.isActive && !user.isVerified && isTokenCorrect && !isTokenExpired;
+
+      if (!ok) {
+        throw new NotFoundError('Incorrect link');
+      }
+    } catch (error) {
+      throw new NotFoundError('Incorrect link');
+    }
+
+    user.isVerified = true;
+    user.isActive = true;
+    user.verificationToken = null;
+    user.verificationTokenExpirationDate = null;
+
+    await this._userRepository.update(user);
+
+    const data = { userId: user._id!, role: user.role };
+    const token = await this.createJWT(data);
+    return token;
+  }
+
+  private async createJWT(data: any /* TODO */): Promise<string> {
+    return new Promise((resolve, reject) => {
+      try {
+        const token = jwt.sign({ data }, JWT_SECRET!, { expiresIn: JWT_LIFETIME ?? '6h' });
+        resolve(token);
+      } catch (error) {
+        reject(new InternalServerError('Error while creating token. Please try again'));
+      }
+    });
   }
 }

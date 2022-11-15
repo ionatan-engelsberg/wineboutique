@@ -25,9 +25,10 @@ export class SignUpDTO {
   @IsEmail()
   email!: string;
 
-  // @IsDate()
+  // TODO: min 18yr old
   @IsString()
-  // TODO: Min 18 yr old
+  // @IsDate()
+  // @IsOlderThan18('birthdate')
   birthdate!: Date;
 
   @IsString()
@@ -41,4 +42,12 @@ export class SignUpDTO {
   @IsOptional()
   @IsPhoneNumber('AR')
   phoneNumber?: number;
+}
+
+export class VerifyAccountDTO {
+  @IsOptional()
+  id!: string;
+
+  @IsOptional()
+  token!: string;
 }

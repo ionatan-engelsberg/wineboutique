@@ -11,7 +11,7 @@ import { User } from '../interfaces';
 import { getVerifyAccountEmailHtml } from '../utils/getEmailHtml';
 
 const TEST_USER_EMAIL = 'mike.hammes90@ethereal.email';
-// TEST_USER_PASSWORD = '6YhpDkG6yv5xEhGE6y
+// TEST_USER_PASSWORD = '6YhpDkG6yv5xEhGE6y'
 
 @Service({ transient: true })
 export class EmailService {

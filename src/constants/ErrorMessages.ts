@@ -15,10 +15,12 @@ export enum DatabaseErrorMessages {
 
 export const ErrorDescriptions = {
   0: 'Password must contain at least one letter and one number',
-  1: 'password and checkPassword do not match'
+  1: 'password and checkPassword do not match',
+  2: 'User must be older than 18 yr old to register'
 };
 
 export enum ErrorCodes {
   PASSWORD_REGEX,
-  EQUAL_PASSWORD
+  EQUAL_PASSWORD,
+  BIGGER_THAN_18
 }

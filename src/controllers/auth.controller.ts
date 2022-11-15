@@ -1,9 +1,9 @@
 import { Service } from 'typedi';
-import { Body, HttpCode, JsonController, Post } from 'routing-controllers';
+import { Body, HttpCode, JsonController, Post, QueryParams } from 'routing-controllers';
 
 import { AuthAdapter } from '../adapters/Auth.adapter';
 
-import { SignUpDTO } from '../dto/Auth.dto';
+import { SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 @JsonController('/auth')
@@ -17,5 +17,10 @@ export class AuthController {
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: SignUpDTO
   ) {
     return this._authAdapter.signup(body);
+  }
+
+  @Post('/verify_account')
+  async verifyAccount(@QueryParams() dto: VerifyAccountDTO) {
+    return this._authAdapter.verifyAccount(dto);
   }
 }
