@@ -70,9 +70,9 @@ export class AuthService {
       const verificationTokenExpirationTimestamp = verificationTokenExpirationDate
         ? verificationTokenExpirationDate.getTime()
         : 1;
-      const currentDate = getCurrentDate().getTime();
+      const currentTimestamp = getCurrentDate().getTime();
 
-      if (currentDate < verificationTokenExpirationTimestamp) {
+      if (currentTimestamp < verificationTokenExpirationTimestamp) {
         throw new ConflictError(`User with email ${email} already exists`, [
           { userId: existingUser._id }
         ]);
@@ -98,9 +98,9 @@ export class AuthService {
       const isTokenExpired =
         user.verificationTokenExpirationDate && currentDate > user.verificationTokenExpirationDate;
 
-      const ok = !user.isActive && !user.isVerified && isTokenCorrect && !isTokenExpired;
+      const validationsOK = !user.isActive && !user.isVerified && isTokenCorrect && !isTokenExpired;
 
-      if (!ok) {
+      if (!validationsOK) {
         throw new NotFoundError('Incorrect link');
       }
     } catch (error) {
@@ -145,11 +145,28 @@ export class AuthService {
       user = await this._userRepository.findOne({ email });
 
       const isPasswordCorrect = this.compareHash(password, user.password);
-      if (!isPasswordCorrect) {
+
+      const { isActive, isVerified, verificationTokenExpirationDate, _id: userId } = user;
+
+      const currentTimestamp = getCurrentDate().getTime();
+      if (
+        !isVerified &&
+        verificationTokenExpirationDate &&
+        verificationTokenExpirationDate.getTime() > currentTimestamp
+      ) {
+        throw new ForbiddenError('You have to verify your account first', [{ userId }]);
+      }
+
+      const validationsOK = isPasswordCorrect && isActive;
+
+      if (!validationsOK) {
         throw new ForbiddenError('Email or Password incorrect');
       }
-    } catch (error) {
-      throw new ForbiddenError('Email or Password incorrect');
+    } catch (error: any) {
+      if (!error.details) {
+        throw new ForbiddenError('Email or Password incorrect');
+      }
+      throw error;
     }
 
     // TODO: See how I will handle JWT & Sessions
