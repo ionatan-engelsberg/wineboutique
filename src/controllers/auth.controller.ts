@@ -3,7 +3,7 @@ import { Body, HttpCode, JsonController, Post, QueryParams } from 'routing-contr
 
 import { AuthAdapter } from '../adapters/Auth.adapter';
 
-import { SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
+import { LoginDTO, SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 @JsonController('/auth')
@@ -22,5 +22,10 @@ export class AuthController {
   @Post('/verify_account')
   async verifyAccount(@QueryParams() dto: VerifyAccountDTO) {
     return this._authAdapter.verifyAccount(dto);
+  }
+
+  @Post('/login')
+  async login(@Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: LoginDTO) {
+    return this._authAdapter.login(dto);
   }
 }

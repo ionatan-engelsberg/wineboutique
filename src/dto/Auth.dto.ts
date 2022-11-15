@@ -51,3 +51,11 @@ export class VerifyAccountDTO {
   @IsOptional()
   token!: string;
 }
+
+export class LoginDTO {
+  @IsEmail()
+  email!: string;
+
+  @IsString()
+  password!: string;
+}

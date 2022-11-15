@@ -4,7 +4,7 @@ import { omit } from 'lodash';
 import { AuthService } from '../services/auth.service';
 
 import { User } from '../interfaces';
-import { SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
+import { LoginDTO, SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
 import { UserRole } from '../types/User.types';
 
 @Service({ transient: true })
@@ -45,5 +45,10 @@ export class AuthAdapter {
   async verifyAccount(dto: VerifyAccountDTO) {
     const { id: userId, token } = dto;
     return this._authService.verifyAccount(userId, token);
+  }
+
+  async login(dto: LoginDTO) {
+    const { email, password } = dto;
+    return this._authService.login(email, password);
   }
 }
