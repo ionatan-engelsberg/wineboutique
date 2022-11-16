@@ -61,3 +61,8 @@ export class ForgotPasswordDTO {
   @IsEmail()
   email!: string;
 }
+
+export class GetUserToResetPasswordDTO {
+  @IsOptional()
+  q!: string;
+}

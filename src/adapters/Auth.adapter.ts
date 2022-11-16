@@ -4,7 +4,13 @@ import { omit } from 'lodash';
 import { AuthService } from '../services/auth.service';
 
 import { User } from '../interfaces';
-import { ForgotPasswordDTO, LoginDTO, SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
+import {
+  ForgotPasswordDTO,
+  GetUserToResetPasswordDTO,
+  LoginDTO,
+  SignUpDTO,
+  VerifyAccountDTO
+} from '../dto/Auth.dto';
 import { UserRole } from '../types/User.types';
 
 @Service({ transient: true })
@@ -55,5 +61,10 @@ export class AuthAdapter {
   async forgotPassword(dto: ForgotPasswordDTO) {
     const { email } = dto;
     return this._authService.forgotPassword(email);
+  }
+
+  async getUserToResetPassword(dto: GetUserToResetPasswordDTO) {
+    const { q: hashedInfo } = dto;
+    return this._authService.getUserToResetPassword(hashedInfo);
   }
 }

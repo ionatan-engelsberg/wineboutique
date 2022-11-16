@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 
 import { JWT_LIFETIME, JWT_SECRET } from '../config/config';
-import { InternalServerError, UnauthorizedError } from '../errors/base.error';
+import { InternalServerError, NotFoundError, UnauthorizedError } from '../errors/base.error';
 
 import { User, UserJWT } from '../interfaces';
 
@@ -34,6 +34,16 @@ export class CredentialsService {
         reject(new UnauthorizedError('Unauthorized'));
       }
     });
+  }
+
+  async getJWTData(token: string) {
+    const data = await this.decodeJWT(token);
+
+    if (!data || typeof data === 'string') {
+      throw new UnauthorizedError('Unauthorized');
+    }
+
+    return data;
   }
 
   async createUserJWT(user: User) {

@@ -85,13 +85,8 @@ export class AuthService {
   async verifyAccount(hashedInfo: string) {
     let user: User;
     try {
-      const info = await this._credentialsService.decodeJWT(hashedInfo);
-
-      if (!info || typeof info === 'string') {
-        throw new NotFoundError('Incorrect link');
-      }
-
-      const { userId, verificationToken } = info.data;
+      const data = await this._credentialsService.getJWTData(hashedInfo);
+      const { userId, verificationToken } = data.data;
 
       user = await this._userRepository.findById(userId);
 
@@ -188,5 +183,40 @@ export class AuthService {
     // NOTE: I save the encrypted token but I the User the decrpyted one
     user.resetPasswordToken = token;
     await this._emailService.sendForgotPasswordEmail(user);
+  }
+
+  async getUserToResetPassword(hashedInfo: string) {
+    let user: User;
+    try {
+      const data = await this._credentialsService.getJWTData(hashedInfo);
+      const { userId, resetPasswordToken } = data.data;
+
+      user = await this._userRepository.findById(userId);
+
+      const { isActive, isVerified, verificationTokenExpirationDate } = user;
+
+      const currentTimestamp = getCurrentDate().getTime();
+      const isVerificationTokenExpired =
+        verificationTokenExpirationDate &&
+        currentTimestamp > verificationTokenExpirationDate.getTime();
+
+      const userValidationsOK = isActive || (!isVerified && !isVerificationTokenExpired);
+      if (!userValidationsOK) {
+        throw new NotFoundError('Incorrect link');
+      }
+
+      const isTokenCorrect =
+        user.resetPasswordToken &&
+        this._credentialsService.compareHash(resetPasswordToken, user.resetPasswordToken);
+      const isTokenExpired =
+        user.resetPasswordTokenExpirationDate &&
+        currentTimestamp > user.resetPasswordTokenExpirationDate.getTime();
+
+      if (!isTokenCorrect || isTokenExpired) {
+        throw new NotFoundError('Incorrect link');
+      }
+    } catch (error) {
+      throw new NotFoundError('Incorrect link');
+    }
   }
 }

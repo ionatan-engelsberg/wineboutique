@@ -1,6 +1,7 @@
 import { Service } from 'typedi';
 import {
   Body,
+  Get,
   HttpCode,
   JsonController,
   OnUndefined,
@@ -10,7 +11,13 @@ import {
 
 import { AuthAdapter } from '../adapters/Auth.adapter';
 
-import { ForgotPasswordDTO, LoginDTO, SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
+import {
+  ForgotPasswordDTO,
+  GetUserToResetPasswordDTO,
+  LoginDTO,
+  SignUpDTO,
+  VerifyAccountDTO
+} from '../dto/Auth.dto';
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 @JsonController('/auth')
@@ -42,5 +49,11 @@ export class AuthController {
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: ForgotPasswordDTO
   ) {
     await this._authAdapter.forgotPassword(dto);
+  }
+
+  @Get('/forgot_password')
+  @OnUndefined(200)
+  async getUserToResetPassword(@QueryParams() dto: GetUserToResetPasswordDTO) {
+    await this._authAdapter.getUserToResetPassword(dto);
   }
 }
