@@ -46,10 +46,7 @@ export class SignUpDTO {
 
 export class VerifyAccountDTO {
   @IsOptional()
-  id!: string;
-
-  @IsOptional()
-  token!: string;
+  q!: string;
 }
 
 export class LoginDTO {
@@ -58,4 +55,9 @@ export class LoginDTO {
 
   @IsString()
   password!: string;
+}
+
+export class ForgotPasswordDTO {
+  @IsEmail()
+  email!: string;
 }

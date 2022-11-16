@@ -1,9 +1,16 @@
 import { Service } from 'typedi';
-import { Body, HttpCode, JsonController, Post, QueryParams } from 'routing-controllers';
+import {
+  Body,
+  HttpCode,
+  JsonController,
+  OnUndefined,
+  Post,
+  QueryParams
+} from 'routing-controllers';
 
 import { AuthAdapter } from '../adapters/Auth.adapter';
 
-import { LoginDTO, SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
+import { ForgotPasswordDTO, LoginDTO, SignUpDTO, VerifyAccountDTO } from '../dto/Auth.dto';
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 @JsonController('/auth')
@@ -27,5 +34,13 @@ export class AuthController {
   @Post('/login')
   async login(@Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: LoginDTO) {
     return this._authAdapter.login(dto);
+  }
+
+  @Post('/forgot_password')
+  @OnUndefined(200)
+  async forgotPassword(
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: ForgotPasswordDTO
+  ) {
+    await this._authAdapter.forgotPassword(dto);
   }
 }

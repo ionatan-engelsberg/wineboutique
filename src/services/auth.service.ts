@@ -1,40 +1,39 @@
 import { Service } from 'typedi';
-import jwt from 'jsonwebtoken';
-import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 import { randomBytes } from 'crypto';
 
-import { JWT_LIFETIME, JWT_SECRET } from '../config/config';
-import {
-  ConflictError,
-  ForbiddenError,
-  InternalServerError,
-  NotFoundError
-} from '../errors/base.error';
+import { ConflictError, ForbiddenError, NotFoundError } from '../errors/base.error';
 
 import { EmailService } from './email.service';
+import { CredentialsService } from './credentials.service';
 
 import { UserRepository } from '../repositories/user.repository';
 
-import { User, UserJWT } from '../interfaces';
+import { User } from '../interfaces';
 import { getCurrentDate } from '../utils/getCurrentDate';
 
-const MILISECONDS_IN_ONE_HOUR = 1000 * 60 * 60;
+const TOKEN_RANDOM_BYTES = 40;
+
+const MILISECONDS_IN_ONE_MINUTE = 1000 * 60;
+const MILISECONDS_IN_ONE_HOUR = MILISECONDS_IN_ONE_MINUTE * 60;
 const MILISECONDS_IN_ONE_DAY = MILISECONDS_IN_ONE_HOUR * 24;
+
 const VERIFICATION_TOKEN_VALIDATION_TIME = 30 * MILISECONDS_IN_ONE_DAY;
+const RESET_PASSWORD_TOKEN_VALIDATION_TIME = 15 * MILISECONDS_IN_ONE_MINUTE;
 
 @Service({ transient: true })
 export class AuthService {
   constructor(
     private readonly _emailService: EmailService,
+    private readonly _credentialsService: CredentialsService,
 
     private readonly _userRepository: UserRepository
   ) {}
 
   async signup(user: User) {
-    const token = randomBytes(40).toString('hex');
-    user.verificationToken = this.hashString(token as string);
+    const token = randomBytes(TOKEN_RANDOM_BYTES).toString('hex');
+    user.verificationToken = this._credentialsService.hashString(token as string);
 
-    user.password = this.hashString(user.password);
+    user.password = this._credentialsService.hashString(user.password);
 
     const currentTimestamp = getCurrentDate().getTime();
     const verificationTokenExpirationTimestamp =
@@ -44,15 +43,11 @@ export class AuthService {
 
     user = await this.createUser(user);
 
+    // NOTE: I save the encrypted token but I send the User the decrpyted one
     user.verificationToken = token;
     await this._emailService.sendVerifyAccountEmail(user);
 
     return user;
-  }
-
-  private hashString(password: string) {
-    const salt = genSaltSync(10);
-    return hashSync(password, salt);
   }
 
   private async createUser(user: User) {
@@ -87,14 +82,23 @@ export class AuthService {
     }
   }
 
-  async verifyAccount(userId: string, verificationToken: string) {
+  async verifyAccount(hashedInfo: string) {
     let user: User;
     try {
+      const info = await this._credentialsService.decodeJWT(hashedInfo);
+
+      if (!info || typeof info === 'string') {
+        throw new NotFoundError('Incorrect link');
+      }
+
+      const { userId, verificationToken } = info.data;
+
       user = await this._userRepository.findById(userId);
 
       const currentDate = getCurrentDate();
       const isTokenCorrect =
-        user.verificationToken && this.compareHash(verificationToken, user.verificationToken);
+        user.verificationToken &&
+        this._credentialsService.compareHash(verificationToken, user.verificationToken);
       const isTokenExpired =
         user.verificationTokenExpirationDate && currentDate > user.verificationTokenExpirationDate;
 
@@ -113,29 +117,7 @@ export class AuthService {
     user.verificationTokenExpirationDate = null;
 
     await this._userRepository.update(user);
-
-    return this.generateToken(user);
-  }
-
-  private async createJWT(data: UserJWT): Promise<string> {
-    return new Promise((resolve, reject) => {
-      try {
-        const token = jwt.sign({ data }, JWT_SECRET!, { expiresIn: JWT_LIFETIME ?? '6h' });
-        resolve(token);
-      } catch (error) {
-        reject(new InternalServerError('Error while creating token. Please try again'));
-      }
-    });
-  }
-
-  private compareHash(inputHash: string, hash: string) {
-    return compareSync(inputHash, hash);
-  }
-
-  private async generateToken(user: User) {
-    const data = { userId: user._id! as string, role: user.role };
-    const token = await this.createJWT(data);
-    return token;
+    return this._credentialsService.createUserJWT(user);
   }
 
   async login(email: string, password: string) {
@@ -143,9 +125,6 @@ export class AuthService {
 
     try {
       user = await this._userRepository.findOne({ email });
-
-      const isPasswordCorrect = this.compareHash(password, user.password);
-
       const { isActive, isVerified, verificationTokenExpirationDate, _id: userId } = user;
 
       const currentTimestamp = getCurrentDate().getTime();
@@ -156,6 +135,8 @@ export class AuthService {
       ) {
         throw new ForbiddenError('You have to verify your account first', [{ userId }]);
       }
+
+      const isPasswordCorrect = this._credentialsService.compareHash(password, user.password);
 
       const validationsOK = isPasswordCorrect && isActive;
 
@@ -170,6 +151,42 @@ export class AuthService {
     }
 
     // TODO: See how I will handle JWT & Sessions
-    return this.generateToken(user);
+    return this._credentialsService.createUserJWT(user);
+  }
+
+  async forgotPassword(email: string) {
+    let user: User;
+    try {
+      user = await this._userRepository.findOne({ email });
+      const { isActive, isVerified, verificationTokenExpirationDate } = user;
+
+      const currentTimestamp = getCurrentDate().getTime();
+      const isTokenExpired =
+        verificationTokenExpirationDate &&
+        currentTimestamp > verificationTokenExpirationDate.getTime();
+
+      const validationsOK = isActive || (!isVerified && !isTokenExpired);
+
+      if (!validationsOK) {
+        throw new NotFoundError(`User with email ${email} does not exist`);
+      }
+    } catch (error) {
+      throw new NotFoundError(`User with email ${email} does not exist`);
+    }
+
+    const token = randomBytes(TOKEN_RANDOM_BYTES).toString('hex');
+    user.resetPasswordToken = this._credentialsService.hashString(token as string);
+
+    const currentTimestamp = getCurrentDate().getTime();
+    const resetPasswordTokenExpirationTimestamp =
+      currentTimestamp + RESET_PASSWORD_TOKEN_VALIDATION_TIME;
+    const resetPasswordTokenExpirationDate = new Date(resetPasswordTokenExpirationTimestamp);
+    user.resetPasswordTokenExpirationDate = resetPasswordTokenExpirationDate;
+
+    await this._userRepository.update(user);
+
+    // NOTE: I save the encrypted token but I the User the decrpyted one
+    user.resetPasswordToken = token;
+    await this._emailService.sendForgotPasswordEmail(user);
   }
 }

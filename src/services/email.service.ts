@@ -6,16 +6,19 @@ import { InternalServerError } from '../errors/base.error';
 // TODO: Temporal. Change for Sendgrid on production
 import { ETHEREAL_USERNAME, ETHEREAL_PASSWORD } from '../config/config';
 
+import { CredentialsService } from './credentials.service';
+
 import { User } from '../interfaces';
 
-import { getVerifyAccountEmailHtml } from '../utils/getEmailHtml';
+import { getVerifyAccountEmailHtml } from '../utils/emails/getVerifyAccountEmailHtml';
+import { getForgotPasswordEmailHtml } from '../utils/emails/getForgotPasswordHtml';
 
 const TEST_USER_EMAIL = 'mike.hammes90@ethereal.email';
 // TEST_USER_PASSWORD = '6YhpDkG6yv5xEhGE6y'
 
 @Service({ transient: true })
 export class EmailService {
-  constructor() {}
+  constructor(private readonly _credentialsService: CredentialsService) {}
 
   private async sendEmail(to: string, from: string, subject: string, html: any) {
     // TODO: Temporal. Change for Sendgrid on production
@@ -30,7 +33,7 @@ export class EmailService {
     });
 
     const info = await transporter.sendMail({ from, to: TEST_USER_EMAIL, subject, html });
-    console.log('MESSAGE URL: ', nodemailer.getTestMessageUrl(info));
+    console.log('TODO - MESSAGE URL: ', nodemailer.getTestMessageUrl(info));
   }
 
   async sendVerifyAccountEmail(user: User) {
@@ -41,8 +44,36 @@ export class EmailService {
       throw new InternalServerError('No email address configured to send an email');
     }
 
+    // TODO
     const subject = 'Verify account';
-    const html = getVerifyAccountEmailHtml(userId! as string, verificationToken!);
+
+    const hashedVerifyAccountInfo = await this._credentialsService.createVerifyAccountToken(
+      userId! as string,
+      verificationToken!
+    );
+
+    const html = getVerifyAccountEmailHtml(hashedVerifyAccountInfo);
+
+    await this.sendEmail(toEmail, fromEmail, subject, html);
+  }
+
+  async sendForgotPasswordEmail(user: User) {
+    const { email: toEmail, _id: userId, resetPasswordToken } = user;
+    const fromEmail = ETHEREAL_USERNAME;
+
+    if (!fromEmail) {
+      throw new InternalServerError('No email address configured to send an email');
+    }
+
+    // TODO
+    const subject = 'Reset password';
+
+    const hashedResetPasswordInfo = await this._credentialsService.createResetPasswordToken(
+      userId! as string,
+      resetPasswordToken!
+    );
+
+    const html = getForgotPasswordEmailHtml(hashedResetPasswordInfo);
 
     await this.sendEmail(toEmail, fromEmail, subject, html);
   }
