@@ -66,3 +66,18 @@ export class GetUserToResetPasswordDTO {
   @IsOptional()
   q!: string;
 }
+
+export class ResetPasswordBody {
+  @IsString()
+  @ContainsLettersAndNumbers('password')
+  password!: string;
+
+  @IsString()
+  @Match('password')
+  checkPassword!: string;
+}
+
+export class ResetPasswordDTO extends ResetPasswordBody {
+  @IsOptional()
+  q!: string;
+}

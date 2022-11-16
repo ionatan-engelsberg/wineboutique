@@ -6,6 +6,7 @@ import {
   JsonController,
   OnUndefined,
   Post,
+  QueryParam,
   QueryParams
 } from 'routing-controllers';
 
@@ -15,6 +16,8 @@ import {
   ForgotPasswordDTO,
   GetUserToResetPasswordDTO,
   LoginDTO,
+  ResetPasswordBody,
+  ResetPasswordDTO,
   SignUpDTO,
   VerifyAccountDTO
 } from '../dto/Auth.dto';
@@ -55,5 +58,15 @@ export class AuthController {
   @OnUndefined(200)
   async getUserToResetPassword(@QueryParams() dto: GetUserToResetPasswordDTO) {
     await this._authAdapter.getUserToResetPassword(dto);
+  }
+
+  @Post('/reset_password')
+  @OnUndefined(200)
+  async resetPassword(
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: ResetPasswordBody,
+    @QueryParam('q') q: string
+  ) {
+    const dto: ResetPasswordDTO = { ...body, q };
+    await this._authAdapter.resetPassword(dto);
   }
 }

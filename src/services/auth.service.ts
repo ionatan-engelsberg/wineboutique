@@ -1,7 +1,13 @@
 import { Service } from 'typedi';
 import { randomBytes } from 'crypto';
 
-import { ConflictError, ForbiddenError, NotFoundError } from '../errors/base.error';
+import {
+  ConflictError,
+  ForbiddenError,
+  IncorrectFormatError,
+  NotFoundError,
+  UnauthorizedError
+} from '../errors/base.error';
 
 import { EmailService } from './email.service';
 import { CredentialsService } from './credentials.service';
@@ -208,6 +214,8 @@ export class AuthService {
     try {
       const data = await this._credentialsService.getJWTData(hashedInfo);
       const { userId, resetPasswordToken } = data.data;
+      console.log('USER: ', userId);
+      console.log('TOKEN: ', resetPasswordToken);
 
       user = await this._userRepository.findById(userId);
 
@@ -236,5 +244,28 @@ export class AuthService {
     } catch (error) {
       throw new NotFoundError('Incorrect link');
     }
+
+    return user;
+  }
+
+  async resetPassword(hashedInfo: string, newPassword: string) {
+    let user: User;
+    try {
+      user = await this.getUserToResetPassword(hashedInfo);
+    } catch (error) {
+      throw new UnauthorizedError('Unauthorized');
+    }
+
+    const isEqualToLastPassword = this._credentialsService.compareHash(newPassword, user.password);
+    if (isEqualToLastPassword) {
+      throw new IncorrectFormatError('New password must be different than current password');
+    }
+
+    user.resetPasswordToken = null;
+    user.resetPasswordTokenExpirationDate = null;
+    user.password = this._credentialsService.hashString(newPassword);
+
+    await this._userRepository.update(user);
+    return user;
   }
 }

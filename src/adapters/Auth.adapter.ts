@@ -8,6 +8,7 @@ import {
   ForgotPasswordDTO,
   GetUserToResetPasswordDTO,
   LoginDTO,
+  ResetPasswordDTO,
   SignUpDTO,
   VerifyAccountDTO
 } from '../dto/Auth.dto';
@@ -65,6 +66,11 @@ export class AuthAdapter {
 
   async getUserToResetPassword(dto: GetUserToResetPasswordDTO) {
     const { q: hashedInfo } = dto;
-    return this._authService.getUserToResetPassword(hashedInfo);
+    await this._authService.getUserToResetPassword(hashedInfo);
+  }
+
+  async resetPassword(dto: ResetPasswordDTO) {
+    const { q: hashedInfo, password } = dto;
+    return this._authService.resetPassword(hashedInfo, password);
   }
 }
