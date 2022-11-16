@@ -85,23 +85,7 @@ export class AuthService {
   async verifyAccount(hashedInfo: string) {
     let user: User;
     try {
-      const data = await this._credentialsService.getJWTData(hashedInfo);
-      const { userId, verificationToken } = data.data;
-
-      user = await this._userRepository.findById(userId);
-
-      const currentDate = getCurrentDate();
-      const isTokenCorrect =
-        user.verificationToken &&
-        this._credentialsService.compareHash(verificationToken, user.verificationToken);
-      const isTokenExpired =
-        user.verificationTokenExpirationDate && currentDate > user.verificationTokenExpirationDate;
-
-      const validationsOK = !user.isActive && !user.isVerified && isTokenCorrect && !isTokenExpired;
-
-      if (!validationsOK) {
-        throw new NotFoundError('Incorrect link');
-      }
+      user = await this.validateVerificationToken(hashedInfo);
     } catch (error) {
       throw new NotFoundError('Incorrect link');
     }
@@ -115,29 +99,33 @@ export class AuthService {
     return this._credentialsService.createUserJWT(user);
   }
 
+  private async validateVerificationToken(hashedInfo: string) {
+    const data = await this._credentialsService.getJWTData(hashedInfo);
+    const { userId, verificationToken } = data.data;
+
+    const user = await this._userRepository.findById(userId);
+
+    const currentDate = getCurrentDate();
+    const isTokenCorrect =
+      user.verificationToken &&
+      this._credentialsService.compareHash(verificationToken, user.verificationToken);
+    const isTokenExpired =
+      user.verificationTokenExpirationDate && currentDate > user.verificationTokenExpirationDate;
+
+    const validationsOK = !user.isActive && !user.isVerified && isTokenCorrect && !isTokenExpired;
+
+    if (!validationsOK) {
+      throw new NotFoundError('Incorrect link');
+    }
+
+    return user;
+  }
+
   async login(email: string, password: string) {
     let user: User;
 
     try {
-      user = await this._userRepository.findOne({ email });
-      const { isActive, isVerified, verificationTokenExpirationDate, _id: userId } = user;
-
-      const currentTimestamp = getCurrentDate().getTime();
-      if (
-        !isVerified &&
-        verificationTokenExpirationDate &&
-        verificationTokenExpirationDate.getTime() > currentTimestamp
-      ) {
-        throw new ForbiddenError('You have to verify your account first', [{ userId }]);
-      }
-
-      const isPasswordCorrect = this._credentialsService.compareHash(password, user.password);
-
-      const validationsOK = isPasswordCorrect && isActive;
-
-      if (!validationsOK) {
-        throw new ForbiddenError('Email or Password incorrect');
-      }
+      user = await this.validateLoginCredentials(email, password);
     } catch (error: any) {
       if (!error.details) {
         throw new ForbiddenError('Email or Password incorrect');
@@ -149,22 +137,34 @@ export class AuthService {
     return this._credentialsService.createUserJWT(user);
   }
 
+  private async validateLoginCredentials(email: string, password: string) {
+    const user = await this._userRepository.findOne({ email });
+    const { isActive, isVerified, verificationTokenExpirationDate, _id: userId } = user;
+
+    const currentTimestamp = getCurrentDate().getTime();
+    if (
+      !isVerified &&
+      verificationTokenExpirationDate &&
+      verificationTokenExpirationDate.getTime() > currentTimestamp
+    ) {
+      throw new ForbiddenError('You have to verify your account first', [{ userId }]);
+    }
+
+    const isPasswordCorrect = this._credentialsService.compareHash(password, user.password);
+
+    const validationsOK = isPasswordCorrect && isActive;
+
+    if (!validationsOK) {
+      throw new ForbiddenError('Email or Password incorrect');
+    }
+
+    return user;
+  }
+
   async forgotPassword(email: string) {
     let user: User;
     try {
-      user = await this._userRepository.findOne({ email });
-      const { isActive, isVerified, verificationTokenExpirationDate } = user;
-
-      const currentTimestamp = getCurrentDate().getTime();
-      const isTokenExpired =
-        verificationTokenExpirationDate &&
-        currentTimestamp > verificationTokenExpirationDate.getTime();
-
-      const validationsOK = isActive || (!isVerified && !isTokenExpired);
-
-      if (!validationsOK) {
-        throw new NotFoundError(`User with email ${email} does not exist`);
-      }
+      user = await this.validateForgotPassword(email);
     } catch (error) {
       throw new NotFoundError(`User with email ${email} does not exist`);
     }
@@ -183,6 +183,24 @@ export class AuthService {
     // NOTE: I save the encrypted token but I the User the decrpyted one
     user.resetPasswordToken = token;
     await this._emailService.sendForgotPasswordEmail(user);
+  }
+
+  private async validateForgotPassword(email: string) {
+    const user = await this._userRepository.findOne({ email });
+    const { isActive, isVerified, verificationTokenExpirationDate } = user;
+
+    const currentTimestamp = getCurrentDate().getTime();
+    const isTokenExpired =
+      verificationTokenExpirationDate &&
+      currentTimestamp > verificationTokenExpirationDate.getTime();
+
+    const validationsOK = isActive || (!isVerified && !isTokenExpired);
+
+    if (!validationsOK) {
+      throw new NotFoundError(`User with email ${email} does not exist`);
+    }
+
+    return user;
   }
 
   async getUserToResetPassword(hashedInfo: string) {
