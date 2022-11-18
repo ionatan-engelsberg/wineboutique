@@ -61,7 +61,7 @@ export const UserSchema = new Schema<User>(
       default: null
     },
     role: {
-      type: String,
+      type: Number,
       enum: {
         values: Object.values(UserRole),
         message: `User role must be one of the following: ${Object.values(UserRole)}`

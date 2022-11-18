@@ -4,15 +4,11 @@ import { Service } from 'typedi';
 
 import { UserJWT } from '../types/User.types';
 import { CredentialsService } from '../services/credentials.service';
-import { UserService } from '../services/user.service';
 
 @Service({ transient: true })
 @Middleware({ type: 'before' })
 export class DecodeUser implements ExpressMiddlewareInterface {
-  constructor(
-    private readonly _credentialsService: CredentialsService,
-    private readonly _userService: UserService
-  ) {}
+  constructor(private readonly _credentialsService: CredentialsService) {}
 
   async use(req: Request, _res: Response, next: NextFunction): Promise<void> {
     try {
@@ -23,10 +19,8 @@ export class DecodeUser implements ExpressMiddlewareInterface {
         return;
       }
 
-      const user = await this._userService.findById(decoded.data.user);
-      const { _id: userId, role } = user;
-
-      req.user = { userId, role } as UserJWT;
+      const { userId, role, token: accessToken } = decoded.data;
+      req.user = { userId, role, accessToken } as UserJWT;
     } catch (error) {
       // Logger
       console.log('WARNING: Error while decoding token:', error);

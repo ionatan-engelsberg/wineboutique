@@ -8,6 +8,7 @@ import { Container } from 'typedi';
 import { controllers } from './controllers';
 import { ErrorHandler } from './middlewares/errorHandler.middleware';
 import { TrimRequest } from './middlewares/trimRequest.middleware';
+import { DecodeUser } from './middlewares/decodeUser.middleware';
 
 import { AuthorizationCheckerService } from './services/auth.checker.service';
 
@@ -24,7 +25,7 @@ const routingControllersOptions = {
   cors: true,
   defaultErrorHandler: false,
   controllers,
-  middlewares: [ErrorHandler, TrimRequest],
+  middlewares: [ErrorHandler, TrimRequest, DecodeUser],
   authorizationChecker: AuthorizationCheckerService.getInstance().authorizationChecker,
   currentUserChecker: AuthorizationCheckerService.getInstance().currentUserChecker
 };

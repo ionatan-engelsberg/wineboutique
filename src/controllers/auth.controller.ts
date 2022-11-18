@@ -11,7 +11,7 @@ import {
   Res
 } from 'routing-controllers';
 
-import { AuthAdapter } from '../adapters/Auth.adapter';
+import { AuthAdapter } from '../adapters/auth.adapter';
 
 import {
   ForgotPasswordDTO,
@@ -41,7 +41,7 @@ export class AuthController {
   @OnUndefined(HttpStatusCode.OK)
   async verifyAccount(@QueryParams() dto: VerifyAccountDTO, @Res() res: any) {
     const { token, cookieOptions } = await this._authAdapter.verifyAccount(dto);
-    res.cookie('token', token, cookieOptions);
+    res.cookie('token', token, { ...cookieOptions });
   }
 
   @Post('/login')
@@ -50,7 +50,7 @@ export class AuthController {
     @Res() res: any
   ) {
     const { token, cookieOptions } = await this._authAdapter.login(dto);
-    res.cookie('token', token, cookieOptions);
+    res.cookie('token', token, { ...cookieOptions });
   }
 
   @Post('/forgot_password')

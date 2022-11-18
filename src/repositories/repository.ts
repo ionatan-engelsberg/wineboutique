@@ -47,6 +47,18 @@ export class BaseRepository<T> {
     return replaceIds(obj) as T;
   }
 
+  async findMany(params: Object): Promise<T[]> {
+    let objs: T[] | null;
+    try {
+      objs = (await this.BaseModel.find(params).lean()) as T[];
+    } catch (error) {
+      // Logger
+      console.log(`WARNING: There was an error while finding ${this.modelName}s`);
+      objs = [];
+    }
+    return objs.map((obj: T) => replaceIds(obj) as T);
+  }
+
   async create(object: T): Promise<T> {
     const dbObj = new this.BaseModel(object);
     try {

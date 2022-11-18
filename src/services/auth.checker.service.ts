@@ -22,7 +22,7 @@ export class AuthorizationCheckerService {
     const userJWT = req.user as UserJWT;
     if (!userJWT) {
       throw new NotFoundError(
-        'Cannot access this route either because it does not exist or permissions are missing'
+        'Cannot access this route either because it does not exist or because permissions are missing'
       );
     }
 
@@ -38,7 +38,7 @@ export class AuthorizationCheckerService {
     const userJWT = req.user as UserJWT;
     if (!userJWT) {
       throw new NotFoundError(
-        'Cannot access this route either because it does not exist or permissions are missing'
+        'Cannot access this route either because it does not exist or because permissions are missing'
       );
     }
     return userJWT;

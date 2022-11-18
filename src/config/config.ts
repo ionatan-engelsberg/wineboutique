@@ -12,7 +12,7 @@ if (!process.env.MONGODB_USERNAME || !process.env.MONGODB_PASSWORD) {
   process.exit(1);
 }
 
-export const { PORT, WEB_URL } = process.env;
+export const { PORT, WEB_URL, ENV } = process.env;
 
 export const { JWT_SECRET, JWT_LIFETIME } = process.env;
 

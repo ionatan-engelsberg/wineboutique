@@ -1,12 +1,14 @@
 export enum UserRole {
-  OWNER = 'OWNER',
-  COFOUNDER = 'COFOUNDER',
-  ADMIN = 'ADMIN',
-  USER = 'USER'
+  OWNER,
+  COFOUNDER,
+  ADMIN,
+  USER
 }
 
 export interface UserJWT {
   userId: string;
 
   role: UserRole;
+
+  accessToken: string | null;
 }

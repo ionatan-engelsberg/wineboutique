@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import jwt from 'jsonwebtoken';
 import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 
-import { JWT_LIFETIME, JWT_SECRET } from '../config/config';
+import { JWT_LIFETIME, JWT_SECRET, ENV } from '../config/config';
 import { InternalServerError, UnauthorizedError } from '../errors/base.error';
 
 import { User } from '../interfaces';
@@ -52,20 +52,27 @@ export class CredentialsService {
   }
 
   async createUserCookies(user: User) {
-    const data = { userId: user._id! as string, role: user.role };
+    const data = { userId: user._id! as string, role: user.role, token: user.accessToken };
 
     const token = await this.createToken(data, JWT_SECRET!, JWT_LIFETIME ?? '6h');
 
     const currentTimestamp = getCurrentDate().getTime();
     const expirationDate = new Date(currentTimestamp + JWT_VALIDATION_TIME);
 
-    const cookieOptions = {
-      httpOnly: true,
-      expires: expirationDate,
-      secure: true,
-      signed: true,
-      sameSite: 'Lax'
-    };
+    const cookieOptions =
+      ENV !== 'dev'
+        ? {
+            httpOnly: true,
+            expires: expirationDate,
+            secure: true,
+            signed: true,
+            sameSite: 'Lax'
+          }
+        : {
+            httpOnly: false,
+            secure: false,
+            signed: true
+          };
 
     return { token, cookieOptions };
   }
