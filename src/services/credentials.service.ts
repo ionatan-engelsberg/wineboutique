@@ -3,12 +3,17 @@ import jwt from 'jsonwebtoken';
 import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 
 import { JWT_LIFETIME, JWT_SECRET } from '../config/config';
-import { InternalServerError, NotFoundError, UnauthorizedError } from '../errors/base.error';
+import { InternalServerError, UnauthorizedError } from '../errors/base.error';
 
 import { User, UserJWT } from '../interfaces';
+import { getCurrentDate } from '../utils/getCurrentDate';
+
+const MILISECONDS_IN_ONE_MINUTE = 1000 * 60;
+const MILISECONDS_IN_ONE_HOUR = MILISECONDS_IN_ONE_MINUTE * 60;
 
 const VERIFY_ACCOUNT_TOKEN_EXPIRATION_TIME = '30d';
 const RESET_PASSWORD_TOKEN_VALIDATION_TIME = '15m';
+const JWT_VALIDATION_TIME = 6 * MILISECONDS_IN_ONE_HOUR;
 
 @Service({ transient: true })
 export class CredentialsService {
@@ -46,9 +51,23 @@ export class CredentialsService {
     return data;
   }
 
-  async createUserJWT(user: User) {
+  async createUserJWTCookies(user: User) {
     const data = { userId: user._id! as string, role: user.role } as UserJWT;
-    return this.createToken(data, JWT_SECRET!, JWT_LIFETIME ?? '6h');
+
+    const token = await this.createToken(data, JWT_SECRET!, JWT_LIFETIME ?? '6h');
+
+    const currentTimestamp = getCurrentDate().getTime();
+    const expirationDate = new Date(currentTimestamp + JWT_VALIDATION_TIME);
+
+    const cookieOptions = {
+      httpOnly: true,
+      expires: expirationDate,
+      secure: true,
+      signed: true,
+      sameSite: 'Lax'
+    };
+
+    return { token, cookieOptions };
   }
 
   hashString(password: string) {

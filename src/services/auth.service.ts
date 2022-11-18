@@ -102,7 +102,7 @@ export class AuthService {
     user.verificationTokenExpirationDate = null;
 
     await this._userRepository.update(user);
-    return this._credentialsService.createUserJWT(user);
+    return this._credentialsService.createUserJWTCookies(user);
   }
 
   private async validateVerificationToken(hashedInfo: string) {
@@ -139,8 +139,7 @@ export class AuthService {
       throw error;
     }
 
-    // TODO: See how I will handle JWT & Sessions
-    return this._credentialsService.createUserJWT(user);
+    return this._credentialsService.createUserJWTCookies(user);
   }
 
   private async validateLoginCredentials(email: string, password: string) {
@@ -214,8 +213,6 @@ export class AuthService {
     try {
       const data = await this._credentialsService.getJWTData(hashedInfo);
       const { userId, resetPasswordToken } = data.data;
-      console.log('USER: ', userId);
-      console.log('TOKEN: ', resetPasswordToken);
 
       user = await this._userRepository.findById(userId);
 

@@ -7,7 +7,8 @@ import {
   OnUndefined,
   Post,
   QueryParam,
-  QueryParams
+  QueryParams,
+  Res
 } from 'routing-controllers';
 
 import { AuthAdapter } from '../adapters/Auth.adapter';
@@ -37,17 +38,23 @@ export class AuthController {
   }
 
   @Post('/verify_account')
-  async verifyAccount(@QueryParams() dto: VerifyAccountDTO) {
-    return this._authAdapter.verifyAccount(dto);
+  @OnUndefined(HttpStatusCode.OK)
+  async verifyAccount(@QueryParams() dto: VerifyAccountDTO, @Res() res: any) {
+    const { token, cookieOptions } = await this._authAdapter.verifyAccount(dto);
+    res.cookie('token', token, cookieOptions);
   }
 
   @Post('/login')
-  async login(@Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: LoginDTO) {
-    return this._authAdapter.login(dto);
+  async login(
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: LoginDTO,
+    @Res() res: any
+  ) {
+    const { token, cookieOptions } = await this._authAdapter.login(dto);
+    res.cookie('token', token, cookieOptions);
   }
 
   @Post('/forgot_password')
-  @OnUndefined(200)
+  @OnUndefined(HttpStatusCode.OK)
   async forgotPassword(
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: ForgotPasswordDTO
   ) {
@@ -55,13 +62,13 @@ export class AuthController {
   }
 
   @Get('/forgot_password')
-  @OnUndefined(200)
+  @OnUndefined(HttpStatusCode.OK)
   async getUserToResetPassword(@QueryParams() dto: GetUserToResetPasswordDTO) {
     await this._authAdapter.getUserToResetPassword(dto);
   }
 
   @Post('/reset_password')
-  @OnUndefined(200)
+  @OnUndefined(HttpStatusCode.OK)
   async resetPassword(
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: ResetPasswordBody,
     @QueryParam('q') q: string
