@@ -38,14 +38,8 @@ export class AuthService {
   async signup(user: User) {
     const token = randomBytes(TOKEN_RANDOM_BYTES).toString('hex');
     user.verificationToken = this._credentialsService.hashString(token as string);
-
     user.password = this._credentialsService.hashString(user.password);
-
-    const currentTimestamp = getCurrentDate().getTime();
-    const verificationTokenExpirationTimestamp =
-      currentTimestamp + VERIFICATION_TOKEN_VALIDATION_TIME;
-    const verificationTokenExpirationDate = new Date(verificationTokenExpirationTimestamp);
-    user.verificationTokenExpirationDate = verificationTokenExpirationDate;
+    user.verificationTokenExpirationDate = this.getUserVerificationTokenExpirationDate();
 
     user = await this.createUser(user);
 
@@ -56,28 +50,18 @@ export class AuthService {
     return user;
   }
 
+  private getUserVerificationTokenExpirationDate() {
+    const currentTimestamp = getCurrentDate().getTime();
+    const verificationTokenExpirationTimestamp =
+      currentTimestamp + VERIFICATION_TOKEN_VALIDATION_TIME;
+    return new Date(verificationTokenExpirationTimestamp);
+  }
+
   private async createUser(user: User) {
     const { email } = user;
     try {
       let existingUser = await this._userRepository.findOne({ email });
-
-      if (existingUser.isActive) {
-        throw new ConflictError(`User with email ${email} already exists`, [
-          { userId: existingUser._id }
-        ]);
-      }
-
-      const { verificationTokenExpirationDate } = user;
-      const verificationTokenExpirationTimestamp = verificationTokenExpirationDate
-        ? verificationTokenExpirationDate.getTime()
-        : 1;
-      const currentTimestamp = getCurrentDate().getTime();
-
-      if (currentTimestamp < verificationTokenExpirationTimestamp) {
-        throw new ConflictError(`User with email ${email} already exists`, [
-          { userId: existingUser._id }
-        ]);
-      }
+      this.validateExistingUser(existingUser);
 
       return this._userRepository.update(existingUser);
     } catch (error: any) {
@@ -85,6 +69,23 @@ export class AuthService {
         throw error;
       }
       return this._userRepository.create(user);
+    }
+  }
+
+  private validateExistingUser(user: User) {
+    const { verificationTokenExpirationDate, email, isActive, _id: userId } = user;
+
+    if (isActive) {
+      throw new ConflictError(`User with email ${email} already exists`, [{ userId }]);
+    }
+
+    const verificationTokenExpirationTimestamp = verificationTokenExpirationDate
+      ? verificationTokenExpirationDate.getTime()
+      : 1;
+    const currentTimestamp = getCurrentDate().getTime();
+
+    if (currentTimestamp < verificationTokenExpirationTimestamp) {
+      throw new ConflictError(`User with email ${email} already exists`, [{ userId }]);
     }
   }
 
@@ -96,6 +97,10 @@ export class AuthService {
       throw new NotFoundError('Incorrect link');
     }
 
+    return this.updateVerifiedUser(user);
+  }
+
+  async updateVerifiedUser(user: User) {
     user.isVerified = true;
     user.isActive = true;
     user.verificationToken = null;

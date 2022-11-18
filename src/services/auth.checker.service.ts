@@ -1,8 +1,7 @@
-// import Container from 'typedi';
 import { Action } from 'routing-controllers';
 
-import { NotFoundError } from '../errors/base.error';
-import { UserJWT } from '../types/User.types';
+import { BadRequestError } from '../errors/base.error';
+import { UserJWT, UserRole } from '../types/User.types';
 
 export class AuthorizationCheckerService {
   private static instance: AuthorizationCheckerService;
@@ -16,19 +15,16 @@ export class AuthorizationCheckerService {
     return this.instance;
   }
 
-  async authorizationChecker(action: Action, permissions?: any[]): Promise<boolean> {
+  async authorizationChecker(action: Action, roles?: UserRole[]): Promise<boolean> {
     const { request: req } = action;
 
     const userJWT = req.user as UserJWT;
-    if (!userJWT) {
-      throw new NotFoundError(
+    if (!userJWT || !roles?.includes(userJWT.role)) {
+      throw new BadRequestError(
         'Cannot access this route either because it does not exist or because permissions are missing'
       );
     }
 
-    // TODO: Check permissions for specific endpoints
-    // const { user, account } = authUser;
-    // Container.get(RoleService).checkPermissions(account, user, permissions);
     return true;
   }
 
@@ -37,7 +33,7 @@ export class AuthorizationCheckerService {
 
     const userJWT = req.user as UserJWT;
     if (!userJWT) {
-      throw new NotFoundError(
+      throw new BadRequestError(
         'Cannot access this route either because it does not exist or because permissions are missing'
       );
     }

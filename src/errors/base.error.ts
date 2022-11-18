@@ -42,6 +42,12 @@ export class ForbiddenError extends BaseError {
   }
 }
 
+export class BadRequestError extends BaseError {
+  constructor(description: string, details?: any) {
+    super(ErrorMessages.BAD_REQUEST, HttpStatusCode.BAD_REQUEST, description, details);
+  }
+}
+
 export class IncorrectFormatError extends BaseError {
   constructor(description: string, details?: any) {
     super(ErrorMessages.INCORRECT_FORMAT, HttpStatusCode.BAD_REQUEST, description, details);

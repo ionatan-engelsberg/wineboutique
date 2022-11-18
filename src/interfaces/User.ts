@@ -20,13 +20,13 @@ export interface User {
 
   isActive: boolean;
 
-  verificationToken: string | null;
+  verificationToken?: string | null;
 
-  verificationTokenExpirationDate: Date | null;
+  verificationTokenExpirationDate?: Date | null;
 
-  resetPasswordToken: string | null;
+  resetPasswordToken?: string | null;
 
-  resetPasswordTokenExpirationDate: Date | null;
+  resetPasswordTokenExpirationDate?: Date | null;
 
   role: UserRole;
 

@@ -31,7 +31,8 @@
     "reflect-metadata": "^0.1.13",
     "routing-controllers": "^0.9.0",
     "trim-request": "^1.0.6",
-    "typedi": "^0.10.0"
+    "typedi": "^0.10.0",
+    "uniqid": "^5.4.0"
   },
   "devDependencies": {
     "eslint": "^8.27.0",
