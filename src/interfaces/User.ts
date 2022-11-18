@@ -32,9 +32,3 @@ export interface User {
 
   accessToken?: string;
 }
-
-export interface UserJWT {
-  userId: string;
-
-  role: UserRole;
-}

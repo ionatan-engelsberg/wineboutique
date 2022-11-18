@@ -5,7 +5,7 @@ import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 import { JWT_LIFETIME, JWT_SECRET } from '../config/config';
 import { InternalServerError, UnauthorizedError } from '../errors/base.error';
 
-import { User, UserJWT } from '../interfaces';
+import { User } from '../interfaces';
 import { getCurrentDate } from '../utils/getCurrentDate';
 
 const MILISECONDS_IN_ONE_MINUTE = 1000 * 60;
@@ -51,8 +51,8 @@ export class CredentialsService {
     return data;
   }
 
-  async createUserJWTCookies(user: User) {
-    const data = { userId: user._id! as string, role: user.role } as UserJWT;
+  async createUserCookies(user: User) {
+    const data = { userId: user._id! as string, role: user.role };
 
     const token = await this.createToken(data, JWT_SECRET!, JWT_LIFETIME ?? '6h');
 

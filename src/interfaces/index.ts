@@ -1,3 +1,3 @@
-import { User, UserJWT } from './User';
+import { User } from './User';
 
-export { User, UserJWT };
+export { User };

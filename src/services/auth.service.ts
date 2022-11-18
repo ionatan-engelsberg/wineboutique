@@ -102,7 +102,7 @@ export class AuthService {
     user.verificationTokenExpirationDate = null;
 
     await this._userRepository.update(user);
-    return this._credentialsService.createUserJWTCookies(user);
+    return this._credentialsService.createUserCookies(user);
   }
 
   private async validateVerificationToken(hashedInfo: string) {
@@ -139,7 +139,7 @@ export class AuthService {
       throw error;
     }
 
-    return this._credentialsService.createUserJWTCookies(user);
+    return this._credentialsService.createUserCookies(user);
   }
 
   private async validateLoginCredentials(email: string, password: string) {

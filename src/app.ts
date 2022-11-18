@@ -9,6 +9,8 @@ import { controllers } from './controllers';
 import { ErrorHandler } from './middlewares/errorHandler.middleware';
 import { TrimRequest } from './middlewares/trimRequest.middleware';
 
+import { AuthorizationCheckerService } from './services/auth.checker.service';
+
 import { COOKIE_SIGNATURE } from './config/config';
 
 // required by routing-controllers
@@ -22,8 +24,9 @@ const routingControllersOptions = {
   cors: true,
   defaultErrorHandler: false,
   controllers,
-  middlewares: [ErrorHandler, TrimRequest]
-  // Checkers
+  middlewares: [ErrorHandler, TrimRequest],
+  authorizationChecker: AuthorizationCheckerService.getInstance().authorizationChecker,
+  currentUserChecker: AuthorizationCheckerService.getInstance().currentUserChecker
 };
 
 useExpressServer(app, routingControllersOptions);

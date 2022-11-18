@@ -4,3 +4,9 @@ export enum UserRole {
   ADMIN = 'ADMIN',
   USER = 'USER'
 }
+
+export interface UserJWT {
+  userId: string;
+
+  role: UserRole;
+}
