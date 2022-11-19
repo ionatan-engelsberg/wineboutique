@@ -11,7 +11,7 @@ import { UserRole } from '../../types/User.types';
 
 const validRoles = [UserRole.COFOUNDER, UserRole.ADMIN];
 
-export function ValidNewUserRole(property: string, validationOptions?: ValidationOptions) {
+export function ValidNewUserWithRole(property: string, validationOptions?: ValidationOptions) {
   return (object: any, propertyName: string) => {
     registerDecorator({
       target: object.constructor,

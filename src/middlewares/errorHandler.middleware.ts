@@ -27,6 +27,7 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
         details = [{ code }];
       } else {
         description = errors[0];
+        details = [{ TODO: 'TODO' }];
       }
     }
 

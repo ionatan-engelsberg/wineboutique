@@ -1,7 +1,15 @@
 import { Service } from 'typedi';
 import uniqid from 'uniqid';
+import { isEqual } from 'lodash';
 
-import { ForbiddenError, UnauthorizedError } from '../errors/base.error';
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  IncorrectFormatError,
+  NotFoundError,
+  UnauthorizedError
+} from '../errors/base.error';
 
 import { AuthService } from './auth.service';
 
@@ -33,7 +41,9 @@ export class UserService {
     }
 
     const filters = { role: { $gte: role, $ne: UserRole.USER } };
-    return this._userRepository.findMany(filters);
+    const sort = { role: 1 };
+
+    return this._userRepository.findMany(filters, sort);
   }
 
   async createUser(authUser: User, newUser: User) {
@@ -47,5 +57,61 @@ export class UserService {
     newUser.password = temporalUserPassword;
 
     return this._authService.signup(newUser);
+  }
+
+  async updateUser(user: User, userToUpdate: User, newUser: User) {
+    if (!userToUpdate.isActive) {
+      throw new NotFoundError(`User with id ${user._id} does not exist`);
+    }
+
+    if (user._id !== userToUpdate._id) {
+      this.validateUpdateOtherUserWithRole(user, userToUpdate, newUser);
+    } else {
+      this.validateUpdateUser(userToUpdate, newUser);
+    }
+    await this.validateUserWithSameEmail(userToUpdate, newUser);
+
+    if (isEqual(userToUpdate, newUser)) {
+      return userToUpdate;
+    }
+
+    return this._userRepository.update(newUser);
+  }
+
+  private validateUpdateOtherUserWithRole(user: User, userToUpdate: User, newUser: User) {
+    if (userToUpdate.role === UserRole.USER || user.role >= userToUpdate.role) {
+      throw new ForbiddenError('Cannot update the requested user');
+    }
+    if (newUser.role <= user.role) {
+      throw new BadRequestError('Can not assign to a user a role equal or higher than its own');
+    }
+  }
+
+  private validateUpdateUser(oldUser: User, newUser: User) {
+    if (oldUser.role !== newUser.role) {
+      throw new ForbiddenError('User can not update its own role');
+    }
+  }
+
+  private async validateUserWithSameEmail(oldUser: User, newUser: User) {
+    let existingUser: User;
+    try {
+      const { email } = newUser;
+      existingUser = await this._userRepository.findOne({ email });
+
+      this._authService.validateExistingUser(existingUser);
+      await this.updateExistingUserEmail(existingUser);
+    } catch (error: any) {
+      if (error.details && error.details[0].userId !== oldUser._id) {
+        throw error;
+      }
+    }
+  }
+
+  private async updateExistingUserEmail(user: User) {
+    const uniqId = uniqid();
+    const ficticiuosEmail = `${uniqId}@gmail.com`;
+    user.email = ficticiuosEmail;
+    await this._userRepository.update(user);
   }
 }

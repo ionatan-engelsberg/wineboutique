@@ -1,12 +1,26 @@
 import { Service } from 'typedi';
-import { Authorized, Body, CurrentUser, Get, JsonController, Post } from 'routing-controllers';
+import {
+  Authorized,
+  Body,
+  CurrentUser,
+  Get,
+  JsonController,
+  OnUndefined,
+  Param,
+  Post,
+  Put
+} from 'routing-controllers';
+
+import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 import { UserAdapter } from '../adapters/user.adapter';
 
 import {
   CreateUserWithRoleBody,
   CreateUserWithRoleDTO,
-  GetUsersWithRoleDTO
+  GetUsersWithRoleDTO,
+  UpdateUserBody,
+  UpdateUserDTO
 } from '../dto/User.dto';
 import { UserJWT, UserRole } from '../types/User.types';
 
@@ -33,5 +47,16 @@ export class UserController {
     const { userId, role } = userJWT;
     const dto: CreateUserWithRoleDTO = { userId, userRole: role, ...body };
     return this._userAdapter.createUserWithRole(dto);
+  }
+
+  @Put('/:userId')
+  @OnUndefined(HttpStatusCode.NO_CONTENT)
+  async updateUser(
+    @CurrentUser() userJWT: UserJWT,
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: UpdateUserBody,
+    @Param('userId') userId: string
+  ) {
+    const dto: UpdateUserDTO = { ...body, userId, user: userJWT };
+    await this._userAdapter.updateUser(dto);
   }
 }

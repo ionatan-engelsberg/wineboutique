@@ -3,7 +3,7 @@ import { omit } from 'lodash';
 
 import { UserService } from '../services/user.service';
 
-import { CreateUserWithRoleDTO, GetUsersWithRoleDTO } from '../dto/User.dto';
+import { CreateUserWithRoleDTO, GetUsersWithRoleDTO, UpdateUserDTO } from '../dto/User.dto';
 import { User } from '../interfaces';
 import { UserRole } from '../types/User.types';
 
@@ -59,5 +59,38 @@ export class UserAdapter {
       'updatedAt'
     ];
     return omit(createdUser, omitFields);
+  }
+
+  async updateUser(dto: UpdateUserDTO) {
+    const { firstName, lastName, email, birthdate, role, userId, user } = dto;
+
+    const oldUser = await this._userService.findById(userId);
+    const userAction =
+      user.userId === userId ? oldUser : await this._userService.findById(user.userId);
+    const newUser = {
+      _id: oldUser._id,
+      firstName,
+      lastName,
+      email,
+      birthdate: new Date(Date.now()), // TODO
+      role,
+      userId,
+      password: oldUser.password,
+      isVerified: oldUser.isVerified,
+      isActive: oldUser.isActive
+    } as User;
+
+    const updatedUser = await this._userService.updateUser(userAction, oldUser, newUser);
+
+    const omitFields = [
+      'password',
+      'verificationToken',
+      'resetPasswordToken',
+      'verificationTokenExpirationDate',
+      'resetPasswordTokenExpirationDate',
+      'createdAt',
+      'updatedAt'
+    ];
+    return omit(updatedUser, omitFields);
   }
 }

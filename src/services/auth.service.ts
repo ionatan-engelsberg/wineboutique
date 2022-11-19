@@ -72,7 +72,7 @@ export class AuthService {
     }
   }
 
-  private validateExistingUser(user: User) {
+  validateExistingUser(user: User) {
     const { verificationTokenExpirationDate, email, isActive, _id: userId } = user;
 
     if (isActive) {

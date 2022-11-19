@@ -5,11 +5,20 @@ import {
   IsString,
   MaxLength,
   MinLength,
-  IsEnum
+  IsEnum,
+  IsObject
 } from 'class-validator';
-import { ValidNewUserRole } from '../utils/validators/createUserRole';
+import { ValidNewUserWithRole } from '../utils/validators/createUserRole';
 
 import { UserRole } from '../types/User.types';
+
+class UserJWT {
+  @IsString()
+  userId!: string;
+
+  @IsEnum(UserRole)
+  role!: UserRole;
+}
 
 export class GetUsersWithRoleDTO {
   @IsString()
@@ -44,7 +53,7 @@ export class CreateUserWithRoleBody {
   phoneNumber?: number;
 
   @IsEnum(UserRole)
-  @ValidNewUserRole('role')
+  @ValidNewUserWithRole('role')
   role!: UserRole;
 }
 
@@ -54,4 +63,41 @@ export class CreateUserWithRoleDTO extends CreateUserWithRoleBody {
 
   @IsEnum(UserRole)
   userRole!: UserRole;
+}
+
+export class UpdateUserBody {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  firstName!: string;
+
+  @IsString()
+  @MinLength(3)
+  @MaxLength(50)
+  lastName!: string;
+
+  @IsEmail()
+  email!: string;
+
+  // TODO: min 18yr old
+  @IsString()
+  // @IsDate()
+  // @IsOlderThan18('birthdate')
+  birthdate!: Date;
+
+  @IsOptional()
+  @IsPhoneNumber('AR')
+  phoneNumber?: number;
+
+  @IsEnum(UserRole)
+  // @ValidNewUserWithRole('role')
+  role!: UserRole;
+}
+
+export class UpdateUserDTO extends UpdateUserBody {
+  @IsString()
+  userId!: string;
+
+  @IsObject()
+  user!: UserJWT;
 }

@@ -45,12 +45,20 @@ export class AuthController {
   }
 
   @Post('/login')
+  @OnUndefined(HttpStatusCode.OK)
   async login(
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: LoginDTO,
     @Res() res: any
   ) {
     const { token, cookieOptions } = await this._authAdapter.login(dto);
     res.cookie('token', token, { ...cookieOptions });
+  }
+
+  // TODO
+  @Post('/logout')
+  @OnUndefined(HttpStatusCode.OK)
+  logout(@Res() res: any) {
+    res.clearCookie('token');
   }
 
   @Post('/forgot_password')
