@@ -68,7 +68,7 @@ export const ProductSchema = new Schema<Product>(
       default: DEFAULT_PRODUCT_IMAGE_URL
     }
   },
-  { timestamps: true, versionKey: false }
+  { versionKey: false }
 );
 
 export const ProductModel = model<Product>('Product', ProductSchema);

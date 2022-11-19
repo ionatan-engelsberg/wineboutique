@@ -13,11 +13,11 @@ export interface Product {
 
   grape: string;
 
-  year: number;
+  year?: number;
 
   type: string; // TODO: Enum
 
-  region: string;
+  region?: string;
 
   featuredInHome: boolean;
 
