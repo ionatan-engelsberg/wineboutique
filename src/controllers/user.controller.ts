@@ -42,7 +42,7 @@ export class UserController {
 
   @Get('/:userId')
   async getUserById(@CurrentUser() userJWT: UserJWT, @Param('userId') userId: string) {
-    const dto: GetUserByIdDTO = { user: userJWT, userId };
+    const dto: GetUserByIdDTO = { userJWT: userJWT, userId };
     return this._userAdapter.getUserById(dto);
   }
 
@@ -53,8 +53,7 @@ export class UserController {
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } })
     body: CreateUserWithRoleBody
   ) {
-    const { userId, role } = userJWT;
-    const dto: CreateUserWithRoleDTO = { userId, userRole: role, ...body };
+    const dto: CreateUserWithRoleDTO = { userJWT, ...body };
     return this._userAdapter.createUserWithRole(dto);
   }
 
@@ -65,14 +64,14 @@ export class UserController {
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: UpdateUserBody,
     @Param('userId') userId: string
   ) {
-    const dto: UpdateUserDTO = { ...body, userId, user: userJWT };
+    const dto: UpdateUserDTO = { ...body, userId, userJWT: userJWT };
     await this._userAdapter.updateUser(dto);
   }
 
   @Delete('/:userId')
   @OnUndefined(HttpStatusCode.NO_CONTENT)
   async deleteUser(@CurrentUser() userJWT: UserJWT, @Param('userId') userId: string) {
-    const dto: DeleteUserDTO = { userId, user: userJWT };
+    const dto: DeleteUserDTO = { userId, userJWT: userJWT };
     await this._userAdapter.deleteUser(dto);
   }
 }

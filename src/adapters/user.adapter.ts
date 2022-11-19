@@ -11,7 +11,6 @@ import {
   UpdateUserDTO
 } from '../dto/User.dto';
 import { User } from '../interfaces';
-import { UserRole } from '../types/User.types';
 
 @Service({ transient: true })
 export class UserAdapter {
@@ -37,13 +36,13 @@ export class UserAdapter {
   }
 
   async getUserById(dto: GetUserByIdDTO) {
-    const { userId, user } = dto;
+    const { userId, userJWT } = dto;
 
     const userToGet = await this._userService.findById(userId);
     const userAction =
-      user.userId === userId ? userToGet : await this._userService.findById(user.userId);
+      userJWT.userId === userId ? userToGet : await this._userService.findById(userJWT.userId);
 
-    const userGot = this._userService.getUserById(userAction, userToGet);
+    const user = this._userService.getUserById(userAction, userToGet);
 
     const omitFields = [
       'password',
@@ -54,11 +53,11 @@ export class UserAdapter {
       'createdAt',
       'updatedAt'
     ];
-    return omit(userGot, omitFields);
+    return omit(user, omitFields);
   }
 
   async createUserWithRole(dto: CreateUserWithRoleDTO) {
-    const { firstName, lastName, email, birthdate, phoneNumber, role, userId } = dto;
+    const { firstName, lastName, email, birthdate, phoneNumber, role, userJWT } = dto;
 
     const newUser = {
       firstName,
@@ -72,7 +71,7 @@ export class UserAdapter {
       isActive: false
     } as User;
 
-    const user = await this._userService.findById(userId);
+    const user = await this._userService.findById(userJWT.userId);
 
     const createdUser = await this._userService.createUser(user, newUser);
 
@@ -89,11 +88,11 @@ export class UserAdapter {
   }
 
   async updateUser(dto: UpdateUserDTO) {
-    const { firstName, lastName, email, birthdate, role, userId, user } = dto;
+    const { firstName, lastName, email, birthdate, role, userId, userJWT } = dto;
 
     const oldUser = await this._userService.findById(userId);
-    const userAction =
-      user.userId === userId ? oldUser : await this._userService.findById(user.userId);
+    const user =
+      userJWT.userId === userId ? oldUser : await this._userService.findById(userJWT.userId);
     const newUser = {
       _id: oldUser._id,
       firstName,
@@ -107,7 +106,7 @@ export class UserAdapter {
       isActive: oldUser.isActive
     } as User;
 
-    const updatedUser = await this._userService.updateUser(userAction, oldUser, newUser);
+    const updatedUser = await this._userService.updateUser(user, oldUser, newUser);
 
     const omitFields = [
       'password',
@@ -122,12 +121,12 @@ export class UserAdapter {
   }
 
   async deleteUser(dto: DeleteUserDTO) {
-    const { userId, user } = dto;
+    const { userId, userJWT } = dto;
 
     const userToDelete = await this._userService.findById(userId);
-    const userAction =
-      user.userId === userId ? userToDelete : await this._userService.findById(user.userId);
+    const user =
+      userJWT.userId === userId ? userToDelete : await this._userService.findById(userJWT.userId);
 
-    await this._userService.deleteUser(userAction, userToDelete);
+    await this._userService.deleteUser(user, userToDelete);
   }
 }

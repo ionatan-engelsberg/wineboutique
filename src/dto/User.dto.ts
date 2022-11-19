@@ -20,13 +20,7 @@ class UserJWT {
   role!: UserRole;
 }
 
-export class GetUsersWithRoleDTO {
-  @IsString()
-  userId!: string;
-
-  @IsEnum(UserRole)
-  role!: UserRole;
-}
+export class GetUsersWithRoleDTO extends UserJWT {}
 
 export class CreateUserWithRoleBody {
   @IsString()
@@ -58,11 +52,8 @@ export class CreateUserWithRoleBody {
 }
 
 export class CreateUserWithRoleDTO extends CreateUserWithRoleBody {
-  @IsString()
-  userId!: string;
-
-  @IsEnum(UserRole)
-  userRole!: UserRole;
+  @IsObject()
+  userJWT!: UserJWT;
 }
 
 export class UpdateUserBody {
@@ -99,7 +90,7 @@ export class UpdateUserDTO extends UpdateUserBody {
   userId!: string;
 
   @IsObject()
-  user!: UserJWT;
+  userJWT!: UserJWT;
 }
 
 export class DeleteUserDTO {
@@ -107,7 +98,7 @@ export class DeleteUserDTO {
   userId!: string;
 
   @IsObject()
-  user!: UserJWT;
+  userJWT!: UserJWT;
 }
 
 export class GetUserByIdDTO {
@@ -115,5 +106,5 @@ export class GetUserByIdDTO {
   userId!: string;
 
   @IsObject()
-  user!: UserJWT;
+  userJWT!: UserJWT;
 }
