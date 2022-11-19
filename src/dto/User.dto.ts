@@ -109,3 +109,11 @@ export class DeleteUserDTO {
   @IsObject()
   user!: UserJWT;
 }
+
+export class GetUserByIdDTO {
+  @IsString()
+  userId!: string;
+
+  @IsObject()
+  user!: UserJWT;
+}

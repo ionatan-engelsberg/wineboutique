@@ -4,9 +4,7 @@ import { isEqual } from 'lodash';
 
 import {
   BadRequestError,
-  ConflictError,
   ForbiddenError,
-  IncorrectFormatError,
   NotFoundError,
   UnauthorizedError
 } from '../errors/base.error';
@@ -46,6 +44,20 @@ export class UserService {
     return this._userRepository.findMany(filters, sort);
   }
 
+  getUserById(user: User, userToGet: User) {
+    if (user._id !== userToGet._id) {
+      this.validateGetOtherUser(user, userToGet);
+    }
+
+    return userToGet;
+  }
+
+  private validateGetOtherUser(user: User, userToGet: User) {
+    if (user.role >= userToGet.role || userToGet.role === UserRole.USER) {
+      throw new NotFoundError(`User with id ${userToGet._id} does not exist`);
+    }
+  }
+
   async createUser(authUser: User, newUser: User) {
     if (authUser.role >= newUser.role) {
       throw new ForbiddenError(
@@ -75,10 +87,10 @@ export class UserService {
   }
 
   private validateUpdateOtherUserWithRole(user: User, userToUpdate: User, newUser: User) {
-    if (user.role === UserRole.USER) {
+    if (user.role >= userToUpdate.role) {
       throw new NotFoundError(`User with id ${userToUpdate._id} does not exist`);
     }
-    if (userToUpdate.role === UserRole.USER || user.role >= userToUpdate.role) {
+    if (userToUpdate.role === UserRole.USER) {
       throw new ForbiddenError('Cannot update the requested user');
     }
     if (newUser.role <= user.role) {
@@ -136,11 +148,10 @@ export class UserService {
   }
 
   private async deleteOtherUser(user: User, userToDelete: User) {
-    if (user.role === UserRole.USER) {
+    if (user.role >= userToDelete.role) {
       throw new NotFoundError(`User with id ${userToDelete._id} does not exist`);
     }
-
-    if (userToDelete.role === UserRole.USER || user.role >= userToDelete.role) {
+    if (userToDelete.role === UserRole.USER) {
       throw new ForbiddenError('Cannot delete the requested user');
     }
 

@@ -6,6 +6,7 @@ import { UserService } from '../services/user.service';
 import {
   CreateUserWithRoleDTO,
   DeleteUserDTO,
+  GetUserByIdDTO,
   GetUsersWithRoleDTO,
   UpdateUserDTO
 } from '../dto/User.dto';
@@ -33,6 +34,27 @@ export class UserAdapter {
     ];
 
     return users.map((u: User) => omit(u, omitFields));
+  }
+
+  async getUserById(dto: GetUserByIdDTO) {
+    const { userId, user } = dto;
+
+    const userToGet = await this._userService.findById(userId);
+    const userAction =
+      user.userId === userId ? userToGet : await this._userService.findById(user.userId);
+
+    const userGot = this._userService.getUserById(userAction, userToGet);
+
+    const omitFields = [
+      'password',
+      'verificationToken',
+      'resetPasswordToken',
+      'verificationTokenExpirationDate',
+      'resetPasswordTokenExpirationDate',
+      'createdAt',
+      'updatedAt'
+    ];
+    return omit(userGot, omitFields);
   }
 
   async createUserWithRole(dto: CreateUserWithRoleDTO) {

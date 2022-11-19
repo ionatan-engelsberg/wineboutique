@@ -20,6 +20,7 @@ import {
   CreateUserWithRoleBody,
   CreateUserWithRoleDTO,
   DeleteUserDTO,
+  GetUserByIdDTO,
   GetUsersWithRoleDTO,
   UpdateUserBody,
   UpdateUserDTO
@@ -37,6 +38,12 @@ export class UserController {
     const { userId, role } = userJWT;
     const dto: GetUsersWithRoleDTO = { userId, role };
     return this._userAdapter.getUsersWithRole(dto);
+  }
+
+  @Get('/:userId')
+  async getUserById(@CurrentUser() userJWT: UserJWT, @Param('userId') userId: string) {
+    const dto: GetUserByIdDTO = { user: userJWT, userId };
+    return this._userAdapter.getUserById(dto);
   }
 
   @Authorized([UserRole.OWNER, UserRole.COFOUNDER])
