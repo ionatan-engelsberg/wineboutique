@@ -10,6 +10,7 @@ import {
 } from '../errors/base.error';
 
 import { AuthService } from './auth.service';
+import { CredentialsService } from './credentials.service';
 
 import { UserRepository } from '../repositories/user.repository';
 
@@ -21,6 +22,7 @@ import { UserRole } from '../types/User.types';
 export class UserService {
   constructor(
     private readonly _authService: AuthService,
+    private readonly _credentialsService: CredentialsService,
 
     private readonly _userRepository: UserRepository
   ) {}
@@ -156,5 +158,18 @@ export class UserService {
     }
 
     await this._userRepository.deleteById(userToDelete._id!);
+  }
+
+  async updateUserPassword(user: User, userId: string, password: string) {
+    if (!user.isActive || user._id !== userId) {
+      throw new NotFoundError(`User with id ${user._id} does not exist`);
+    }
+
+    if (user.password === password) {
+      return;
+    }
+
+    user.password = this._credentialsService.hashString(password);
+    await this._userRepository.update(user);
   }
 }

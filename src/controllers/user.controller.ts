@@ -23,7 +23,9 @@ import {
   GetUserByIdDTO,
   GetUsersWithRoleDTO,
   UpdateUserBody,
-  UpdateUserDTO
+  UpdateUserDTO,
+  UpdateUserPasswordBody,
+  UpdateUserPasswordDTO
 } from '../dto/User.dto';
 import { UserJWT, UserRole } from '../types/User.types';
 
@@ -35,14 +37,13 @@ export class UserController {
   @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
   @Get()
   async getUsersWithRole(@CurrentUser() userJWT: UserJWT) {
-    const { userId, role } = userJWT;
-    const dto: GetUsersWithRoleDTO = { userId, role };
+    const dto: GetUsersWithRoleDTO = userJWT;
     return this._userAdapter.getUsersWithRole(dto);
   }
 
   @Get('/:userId')
   async getUserById(@CurrentUser() userJWT: UserJWT, @Param('userId') userId: string) {
-    const dto: GetUserByIdDTO = { userJWT: userJWT, userId };
+    const dto: GetUserByIdDTO = { userJWT, userId };
     return this._userAdapter.getUserById(dto);
   }
 
@@ -64,14 +65,26 @@ export class UserController {
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: UpdateUserBody,
     @Param('userId') userId: string
   ) {
-    const dto: UpdateUserDTO = { ...body, userId, userJWT: userJWT };
+    const dto: UpdateUserDTO = { ...body, userId, userJWT };
     await this._userAdapter.updateUser(dto);
+  }
+
+  @Put('/:userId/password')
+  @OnUndefined(HttpStatusCode.NO_CONTENT)
+  async updateUserPassword(
+    @CurrentUser() userJWT: UserJWT,
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } })
+    body: UpdateUserPasswordBody,
+    @Param('userId') userId: string
+  ) {
+    const dto: UpdateUserPasswordDTO = { ...body, userId, userJWT };
+    await this._userAdapter.updateUserPassword(dto);
   }
 
   @Delete('/:userId')
   @OnUndefined(HttpStatusCode.NO_CONTENT)
   async deleteUser(@CurrentUser() userJWT: UserJWT, @Param('userId') userId: string) {
-    const dto: DeleteUserDTO = { userId, userJWT: userJWT };
+    const dto: DeleteUserDTO = { userId, userJWT };
     await this._userAdapter.deleteUser(dto);
   }
 }

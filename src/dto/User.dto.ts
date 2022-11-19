@@ -9,6 +9,8 @@ import {
   IsObject
 } from 'class-validator';
 import { ValidNewUserWithRole } from '../utils/validators/createUserRole';
+import { ContainsLettersAndNumbers } from '../utils/validators/passwordRegex';
+import { Match } from '../utils/validators/passwordsAreEqual';
 
 import { UserRole } from '../types/User.types';
 
@@ -107,4 +109,22 @@ export class GetUserByIdDTO {
 
   @IsObject()
   userJWT!: UserJWT;
+}
+
+export class UpdateUserPasswordBody {
+  @IsString()
+  @ContainsLettersAndNumbers('password')
+  password!: string;
+
+  @IsString()
+  @Match('password')
+  checkPassword!: string;
+}
+
+export class UpdateUserPasswordDTO extends UpdateUserPasswordBody {
+  @IsObject()
+  userJWT!: UserJWT;
+
+  @IsString()
+  userId!: string;
 }

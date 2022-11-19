@@ -8,7 +8,8 @@ import {
   DeleteUserDTO,
   GetUserByIdDTO,
   GetUsersWithRoleDTO,
-  UpdateUserDTO
+  UpdateUserDTO,
+  UpdateUserPasswordDTO
 } from '../dto/User.dto';
 import { User } from '../interfaces';
 
@@ -128,5 +129,13 @@ export class UserAdapter {
       userJWT.userId === userId ? userToDelete : await this._userService.findById(userJWT.userId);
 
     await this._userService.deleteUser(user, userToDelete);
+  }
+
+  async updateUserPassword(dto: UpdateUserPasswordDTO) {
+    const { password, userJWT, userId } = dto;
+
+    const user = await this._userService.findById(userJWT.userId);
+
+    await this._userService.updateUserPassword(user, userId, password);
   }
 }
