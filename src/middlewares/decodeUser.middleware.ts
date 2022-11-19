@@ -19,8 +19,8 @@ export class DecodeUser implements ExpressMiddlewareInterface {
         return;
       }
 
-      const { userId, role, token: accessToken } = decoded.data;
-      req.user = { userId, role, accessToken } as UserJWT;
+      const { userId, role } = decoded.data;
+      req.user = { userId, role } as UserJWT;
     } catch (error) {
       // Logger
       console.log('WARNING: Error while decoding token:', error);

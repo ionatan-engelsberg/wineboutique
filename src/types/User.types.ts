@@ -9,6 +9,4 @@ export interface UserJWT {
   userId: string;
 
   role: UserRole;
-
-  accessToken: string | null;
 }

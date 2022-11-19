@@ -29,6 +29,4 @@ export interface User {
   resetPasswordTokenExpirationDate?: Date | null;
 
   role: UserRole;
-
-  accessToken?: string;
 }

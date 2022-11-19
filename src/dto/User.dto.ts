@@ -17,9 +17,6 @@ export class GetUsersWithRoleDTO {
 
   @IsEnum(UserRole)
   role!: UserRole;
-
-  @IsString()
-  accessToken!: string;
 }
 
 export class CreateUserWithRoleBody {
@@ -57,7 +54,4 @@ export class CreateUserWithRoleDTO extends CreateUserWithRoleBody {
 
   @IsEnum(UserRole)
   userRole!: UserRole;
-
-  @IsString()
-  accessToken!: string | null;
 }

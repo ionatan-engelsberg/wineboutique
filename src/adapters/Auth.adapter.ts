@@ -36,7 +36,6 @@ export class AuthAdapter {
     const newUser = await this._authService.signup(user);
 
     const omitFields = [
-      'accessToken',
       'password',
       'verificationToken',
       'resetPasswordToken',

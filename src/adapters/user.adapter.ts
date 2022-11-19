@@ -12,13 +12,12 @@ export class UserAdapter {
   constructor(private readonly _userService: UserService) {}
 
   async getUsersWithRole(dto: GetUsersWithRoleDTO) {
-    const { userId, accessToken } = dto;
+    const { userId } = dto;
 
     const user = await this._userService.findById(userId);
-    const users = await this._userService.getUsersWithRole(user, accessToken);
+    const users = await this._userService.getUsersWithRole(user);
 
     const omitFields = [
-      'accessToken',
       'password',
       'verificationToken',
       'resetPasswordToken',
@@ -32,7 +31,7 @@ export class UserAdapter {
   }
 
   async createUserWithRole(dto: CreateUserWithRoleDTO) {
-    const { firstName, lastName, email, birthdate, phoneNumber, role, userId, accessToken } = dto;
+    const { firstName, lastName, email, birthdate, phoneNumber, role, userId } = dto;
 
     const newUser = {
       firstName,
@@ -48,10 +47,9 @@ export class UserAdapter {
 
     const user = await this._userService.findById(userId);
 
-    const createdUser = await this._userService.createUser(user, newUser, accessToken!);
+    const createdUser = await this._userService.createUser(user, newUser);
 
     const omitFields = [
-      'accessToken',
       'password',
       'verificationToken',
       'resetPasswordToken',

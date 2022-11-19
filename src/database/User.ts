@@ -67,10 +67,6 @@ export const UserSchema = new Schema<User>(
         message: `User role must be one of the following: ${Object.values(UserRole)}`
       },
       default: UserRole.USER
-    },
-    accessToken: {
-      type: String,
-      default: null
     }
   },
   { timestamps: true, versionKey: false }

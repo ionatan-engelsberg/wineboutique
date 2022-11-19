@@ -18,8 +18,8 @@ export class UserController {
   @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
   @Get()
   async getUsersWithRole(@CurrentUser() userJWT: UserJWT) {
-    const { userId, role, accessToken } = userJWT;
-    const dto: GetUsersWithRoleDTO = { userId, role, accessToken: accessToken as string };
+    const { userId, role } = userJWT;
+    const dto: GetUsersWithRoleDTO = { userId, role };
     return this._userAdapter.getUsersWithRole(dto);
   }
 
@@ -30,8 +30,8 @@ export class UserController {
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } })
     body: CreateUserWithRoleBody
   ) {
-    const { userId, role, accessToken } = userJWT;
-    const dto: CreateUserWithRoleDTO = { userId, userRole: role, accessToken, ...body };
+    const { userId, role } = userJWT;
+    const dto: CreateUserWithRoleDTO = { userId, userRole: role, ...body };
     return this._userAdapter.createUserWithRole(dto);
   }
 }

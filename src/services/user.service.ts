@@ -19,19 +19,12 @@ export class UserService {
     private readonly _userRepository: UserRepository
   ) {}
 
-  private validateToken(user: User, token: string | null) {
-    if (user.accessToken !== token) {
-      throw new UnauthorizedError('Private route');
-    }
-  }
-
   async findById(userId: ObjectId) {
     return this._userRepository.findById(userId);
   }
 
-  async getUsersWithRole(user: User, token: string) {
+  async getUsersWithRole(user: User) {
     const { role, isActive, isVerified } = user;
-    this.validateToken(user, token);
 
     const validationsOK = isActive && isVerified;
 
@@ -43,8 +36,7 @@ export class UserService {
     return this._userRepository.findMany(filters);
   }
 
-  async createUser(authUser: User, newUser: User, token: string) {
-    this.validateToken(authUser, token);
+  async createUser(authUser: User, newUser: User) {
     if (authUser.role >= newUser.role) {
       throw new ForbiddenError(
         'User can not create other users with roles greater or equal to its own'
