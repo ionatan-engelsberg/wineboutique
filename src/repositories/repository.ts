@@ -74,6 +74,18 @@ export class BaseRepository<T> {
     return replaceIds(dbObj.toObject()) as T;
   }
 
+  async deleteById(objectId: ObjectId): Promise<void> {
+    try {
+      await this.BaseModel.findByIdAndDelete(objectId);
+    } catch (error: any) {
+      handleMongoError(error);
+      throw new DatabaseError(
+        DatabaseErrorMessages.COULD_NOT_SAVE,
+        error.message ?? `There was an error while deleting the ${this.modelName}`
+      );
+    }
+  }
+
   async update(object: any): Promise<T> {
     const { _id: objectId, ...obj } = object;
     let dbObj: T;

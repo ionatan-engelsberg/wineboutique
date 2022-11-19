@@ -101,3 +101,11 @@ export class UpdateUserDTO extends UpdateUserBody {
   @IsObject()
   user!: UserJWT;
 }
+
+export class DeleteUserDTO {
+  @IsString()
+  userId!: string;
+
+  @IsObject()
+  user!: UserJWT;
+}

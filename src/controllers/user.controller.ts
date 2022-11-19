@@ -3,6 +3,7 @@ import {
   Authorized,
   Body,
   CurrentUser,
+  Delete,
   Get,
   JsonController,
   OnUndefined,
@@ -18,6 +19,7 @@ import { UserAdapter } from '../adapters/user.adapter';
 import {
   CreateUserWithRoleBody,
   CreateUserWithRoleDTO,
+  DeleteUserDTO,
   GetUsersWithRoleDTO,
   UpdateUserBody,
   UpdateUserDTO
@@ -58,5 +60,12 @@ export class UserController {
   ) {
     const dto: UpdateUserDTO = { ...body, userId, user: userJWT };
     await this._userAdapter.updateUser(dto);
+  }
+
+  @Delete('/:userId')
+  @OnUndefined(HttpStatusCode.NO_CONTENT)
+  async deleteUser(@CurrentUser() userJWT: UserJWT, @Param('userId') userId: string) {
+    const dto: DeleteUserDTO = { userId, user: userJWT };
+    await this._userAdapter.deleteUser(dto);
   }
 }

@@ -3,7 +3,12 @@ import { omit } from 'lodash';
 
 import { UserService } from '../services/user.service';
 
-import { CreateUserWithRoleDTO, GetUsersWithRoleDTO, UpdateUserDTO } from '../dto/User.dto';
+import {
+  CreateUserWithRoleDTO,
+  DeleteUserDTO,
+  GetUsersWithRoleDTO,
+  UpdateUserDTO
+} from '../dto/User.dto';
 import { User } from '../interfaces';
 import { UserRole } from '../types/User.types';
 
@@ -92,5 +97,15 @@ export class UserAdapter {
       'updatedAt'
     ];
     return omit(updatedUser, omitFields);
+  }
+
+  async deleteUser(dto: DeleteUserDTO) {
+    const { userId, user } = dto;
+
+    const userToDelete = await this._userService.findById(userId);
+    const userAction =
+      user.userId === userId ? userToDelete : await this._userService.findById(user.userId);
+
+    await this._userService.deleteUser(userAction, userToDelete);
   }
 }

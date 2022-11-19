@@ -60,10 +60,6 @@ export class UserService {
   }
 
   async updateUser(user: User, userToUpdate: User, newUser: User) {
-    if (!userToUpdate.isActive) {
-      throw new NotFoundError(`User with id ${user._id} does not exist`);
-    }
-
     if (user._id !== userToUpdate._id) {
       this.validateUpdateOtherUserWithRole(user, userToUpdate, newUser);
     } else {
@@ -79,6 +75,9 @@ export class UserService {
   }
 
   private validateUpdateOtherUserWithRole(user: User, userToUpdate: User, newUser: User) {
+    if (user.role === UserRole.USER) {
+      throw new NotFoundError(`User with id ${userToUpdate._id} does not exist`);
+    }
     if (userToUpdate.role === UserRole.USER || user.role >= userToUpdate.role) {
       throw new ForbiddenError('Cannot update the requested user');
     }
@@ -90,6 +89,10 @@ export class UserService {
   private validateUpdateUser(oldUser: User, newUser: User) {
     if (oldUser.role !== newUser.role) {
       throw new ForbiddenError('User can not update its own role');
+    }
+
+    if (!oldUser.isActive) {
+      throw new NotFoundError(`User with id ${oldUser._id} does not exist`);
     }
   }
 
@@ -113,5 +116,34 @@ export class UserService {
     const ficticiuosEmail = `${uniqId}@gmail.com`;
     user.email = ficticiuosEmail;
     await this._userRepository.update(user);
+  }
+
+  async deleteUser(user: User, userToDelete: User) {
+    if (user._id !== userToDelete._id) {
+      return this.deleteOtherUser(user, userToDelete);
+    }
+
+    if (!userToDelete.isActive) {
+      throw new NotFoundError(`User with id ${userToDelete._id} does not exist`);
+    }
+
+    if (userToDelete.role !== UserRole.USER) {
+      throw new ForbiddenError('This user can not delete its own account');
+    }
+
+    userToDelete.isActive = false;
+    await this._userRepository.update(userToDelete);
+  }
+
+  private async deleteOtherUser(user: User, userToDelete: User) {
+    if (user.role === UserRole.USER) {
+      throw new NotFoundError(`User with id ${userToDelete._id} does not exist`);
+    }
+
+    if (userToDelete.role === UserRole.USER || user.role >= userToDelete.role) {
+      throw new ForbiddenError('Cannot delete the requested user');
+    }
+
+    await this._userRepository.deleteById(userToDelete._id!);
   }
 }
