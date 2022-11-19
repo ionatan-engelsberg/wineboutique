@@ -47,7 +47,7 @@ export class BaseRepository<T> {
     return replaceIds(obj) as T;
   }
 
-  async findMany(params: Object, sort: any): Promise<T[]> {
+  async findMany(params: Object, sort?: any): Promise<T[]> {
     let objs: T[] | null;
     try {
       objs = (await this.BaseModel.find(params).sort(sort).lean()) as T[];
@@ -57,6 +57,18 @@ export class BaseRepository<T> {
       objs = [];
     }
     return objs.map((obj: T) => replaceIds(obj) as T);
+  }
+
+  async countDocuments(params: Object): Promise<number> {
+    let count: number | undefined;
+    try {
+      count = await this.BaseModel.countDocuments(params);
+    } catch (error) {
+      // Logger
+      console.log(`WARNING: There was an error while counting ${this.modelName}s`);
+      count = 0;
+    }
+    return count;
   }
 
   async create(object: T): Promise<T> {

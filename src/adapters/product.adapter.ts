@@ -9,4 +9,8 @@ export class ProductAdapter {
   async createTestProducts() {
     await this._productService.createTestProducts();
   }
+
+  async getProducts() {
+    return this._productService.getProducts()
+  }
 }
