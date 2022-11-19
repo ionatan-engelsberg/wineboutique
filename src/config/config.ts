@@ -27,3 +27,5 @@ export const MONGODB_URI = `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD
 // TODO: production URL: `mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/?authSource=admin`
 
 export const { ETHEREAL_USERNAME, ETHEREAL_PASSWORD } = process.env;
+
+export const { DEFAULT_PRODUCT_IMAGE_URL } = process.env;
