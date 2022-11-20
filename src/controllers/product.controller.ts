@@ -1,9 +1,11 @@
 import { Service } from 'typedi';
-import { Get, JsonController, Post } from 'routing-controllers';
+import { Get, HttpCode, JsonController, Post, QueryParams } from 'routing-controllers';
 
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 import { ProductAdapter } from '../adapters/product.adapter';
+
+import { GetProductsDTO, GetProductsFilters } from '../dto/Product.dto';
 
 @JsonController('/products')
 @Service({ transient: true })
@@ -16,7 +18,12 @@ export class ProductController {
   }
 
   @Get()
-  async getProducts() {
-    return this._productAdapter.getProducts();
+  @HttpCode(HttpStatusCode.OK)
+  async getProducts(
+    @QueryParams({ validate: { whitelist: true, forbidNonWhitelisted: true } })
+    filters: GetProductsFilters
+  ) {
+    const dto: GetProductsDTO = { filters };
+    return this._productAdapter.getProducts(dto);
   }
 }

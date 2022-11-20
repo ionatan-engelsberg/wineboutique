@@ -15,18 +15,10 @@ export class ProductRepository extends BaseRepository<Product> {
     super(ProductModel);
   }
 
-  async getProductsFilters(params: Object, addToSetObject: any): Promise<any> {
+  async getProductsFilters(aggregateQuery: any[]): Promise<any> {
     let filters: any;
     try {
-      filters = await ProductModel.aggregate([
-        { $match: { ...params } },
-        {
-          $group: {
-            _id: 0,
-            ...addToSetObject
-          }
-        }
-      ]);
+      filters = await ProductModel.aggregate(aggregateQuery);
     } catch (error) {
       logErrors(error);
       throw new InternalServerError('There was an error while finding Products filters');
@@ -36,10 +28,10 @@ export class ProductRepository extends BaseRepository<Product> {
 
   async getProducts(
     params: Object,
-    limit: number,
     sort: any,
-    selectFields: string,
-    offset: number = 0
+    offset: number,
+    limit: number,
+    selectFields: string
   ): Promise<Product[]> {
     let objs: Product[] | null;
     try {
@@ -50,9 +42,8 @@ export class ProductRepository extends BaseRepository<Product> {
         .select(selectFields)
         .lean()) as Product[];
     } catch (error) {
-      console.log(`WARNING: There was an error while finding ${this.modelName}s`);
       logErrors(error);
-      objs = [];
+      throw new InternalServerError('There was an error while finding the Products');
     }
     return objs.map((obj: Product) => replaceIds(obj) as Product);
   }

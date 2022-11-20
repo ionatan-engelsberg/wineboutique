@@ -60,18 +60,6 @@ export class BaseRepository<T> {
     return objs.map((obj: T) => replaceIds(obj) as T);
   }
 
-  async countDocuments(params: Object): Promise<number> {
-    let count: number | undefined;
-    try {
-      count = await this.BaseModel.countDocuments(params);
-    } catch (error) {
-      console.log(`WARNING: There was an error while counting ${this.modelName}s`);
-      logErrors(error);
-      count = 0;
-    }
-    return count;
-  }
-
   async create(object: T): Promise<T> {
     const dbObj = new this.BaseModel(object);
     try {
