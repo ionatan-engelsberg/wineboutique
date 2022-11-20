@@ -4,6 +4,7 @@ import { Service } from 'typedi';
 
 import { UserJWT } from '../types/User.types';
 import { CredentialsService } from '../services/credentials.service';
+import { logErrors } from '../utils/logger';
 
 @Service({ transient: true })
 @Middleware({ type: 'before' })
@@ -22,8 +23,8 @@ export class DecodeUser implements ExpressMiddlewareInterface {
       const { userId, role } = decoded.data;
       req.user = { userId, role } as UserJWT;
     } catch (error) {
-      // Logger
       console.log('WARNING: Error while decoding token:', error);
+      await logErrors(error);
     } finally {
       next();
     }

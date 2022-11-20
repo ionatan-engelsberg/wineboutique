@@ -7,6 +7,7 @@ import { BaseRepository } from './repository';
 import { ProductModel } from '../database/Product';
 import { Product } from '../interfaces';
 import { replaceIds } from '../utils/replaceIds';
+import { logErrors } from '../utils/logger';
 
 @Service({ transient: true })
 export class ProductRepository extends BaseRepository<Product> {
@@ -27,7 +28,7 @@ export class ProductRepository extends BaseRepository<Product> {
         }
       ]);
     } catch (error) {
-      // Logger
+      logErrors(error);
       throw new InternalServerError('There was an error while finding Products filters');
     }
     return filters;
@@ -49,8 +50,8 @@ export class ProductRepository extends BaseRepository<Product> {
         .select(selectFields)
         .lean()) as Product[];
     } catch (error) {
-      // Logger
       console.log(`WARNING: There was an error while finding ${this.modelName}s`);
+      logErrors(error);
       objs = [];
     }
     return objs.map((obj: Product) => replaceIds(obj) as Product);

@@ -7,6 +7,7 @@ import { handleMongoError } from '../errors/handleMongoError';
 
 import { replaceIds } from '../utils/replaceIds';
 import { ObjectId } from '../types/ObjectId';
+import { logErrors } from '../utils/logger';
 
 @Service({ transient: true })
 export class BaseRepository<T> {
@@ -52,8 +53,8 @@ export class BaseRepository<T> {
     try {
       objs = (await this.BaseModel.find(params).sort(sort).lean()) as T[];
     } catch (error) {
-      // Logger
       console.log(`WARNING: There was an error while finding ${this.modelName}s`);
+      logErrors(error);
       objs = [];
     }
     return objs.map((obj: T) => replaceIds(obj) as T);
@@ -64,8 +65,8 @@ export class BaseRepository<T> {
     try {
       count = await this.BaseModel.countDocuments(params);
     } catch (error) {
-      // Logger
       console.log(`WARNING: There was an error while counting ${this.modelName}s`);
+      logErrors(error);
       count = 0;
     }
     return count;
