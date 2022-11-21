@@ -2,10 +2,18 @@ import { Service } from 'typedi';
 import uniqid from 'uniqid';
 import { omit } from 'lodash';
 
+import { IncorrectFormatError, NotFoundError } from '../errors/base.error';
+
 import { ProductRepository } from '../repositories/product.repository';
 
 import { GetProductsFilters } from '../dto/Product.dto';
-import { ProductFilters } from '../types/Product.types';
+import {
+  GetProductsParsedSort,
+  ProductFilters,
+  ProductFiltersType,
+  ProductFiltersTypeEnum,
+  ProductPriceParsedKey
+} from '../types/Product.types';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
 const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined'; // TODO: Depending on UserRole
@@ -54,22 +62,20 @@ export class ProductService {
     }
   }
 
-  async getProducts(filtersParams: GetProductsFilters) {
-    const { offset: page } = filtersParams;
+  async getProducts(receivedFilters: GetProductsFilters) {
+    const { page, sort: receivedSort, ...filterParams } = receivedFilters;
 
-    const sort = { name: 1 }; // TODO
+    const sort = GetProductsParsedSort[receivedSort];
     const limit = DEFAULT_GET_PRODUCTS_LIMIT;
     const offset = (page - 1) * limit;
     const selectFields = DEFAULT_SELECT_FIELDS;
 
-    const filters = this.getFilters(filtersParams);
+    const filters = this.getFilters(filterParams as GetProductsFilters);
     const aggregateQuery = this.getAggregateQuery(filters);
-
-    const productsFilters = { ...filters, stock: { $gt: 0 } };
 
     const { total, withStock, ...uniqueFilters } = await this.getFiltersInfo(aggregateQuery);
     const products = await this.getFilteredProducts(
-      productsFilters,
+      filters,
       sort,
       offset,
       limit,
@@ -81,12 +87,12 @@ export class ProductService {
     return { totalPages, filters: uniqueFilters, products };
   }
 
-  private getAggregateQuery(filters: any /* TODO */) {
+  private getAggregateQuery(filters: Object) {
     const match = { $match: { ...filters } };
 
     const filterValues = Object.values(ProductFilters);
-    const uniqueFilters = this.getUniqueFilters(filterValues);
-    const countFilters = this.getCountFilters();
+    const uniqueFilters = this.getUniqueFiltersAggregation(filterValues);
+    const countFilters = this.getCountFiltersAggregation();
 
     const filtersInfo = {
       $group: {
@@ -99,7 +105,7 @@ export class ProductService {
     return [match, filtersInfo];
   }
 
-  private getUniqueFilters(filters: ProductFilters[]) {
+  private getUniqueFiltersAggregation(filters: ProductFilters[]) {
     const addToSetObject: any = {};
     filters.forEach((key) => {
       addToSetObject[key] = { $addToSet: `$${key}` };
@@ -108,7 +114,7 @@ export class ProductService {
     return addToSetObject;
   }
 
-  private getCountFilters() {
+  private getCountFiltersAggregation() {
     const withStock = {
       withStock: { $sum: { $cond: { if: { $gt: ['$stock', 0] }, then: 1, else: 0 } } }
     };
@@ -123,7 +129,47 @@ export class ProductService {
   }
 
   private getFilters(filtersParams: GetProductsFilters) {
-    return {};
+    const receivedFilters = Object.entries(filtersParams);
+    const filters = {};
+
+    receivedFilters.forEach((filter) => {
+      const key = filter[0];
+      const value = filter[1];
+
+      const keyType = ProductFiltersType[key];
+
+      switch (keyType) {
+        case ProductFiltersTypeEnum.ARRAY: {
+          filters[key] = { $in: value };
+          break;
+        }
+        case ProductFiltersTypeEnum.MAX_VALUE: {
+          // TODO: Receive "pice" object ( { min: number: max: number } )
+          const parsedKey = ProductPriceParsedKey[key];
+          filters[parsedKey] = { ...filters[parsedKey], $lte: value };
+          break;
+        }
+        case ProductFiltersTypeEnum.MIN_VALUE: {
+          // TODO: Receive "pice" object ( { min: number: max: number } )
+          const parsedKey = ProductPriceParsedKey[key];
+          filters[parsedKey] = { $gte: value };
+          break;
+        }
+        case ProductFiltersTypeEnum.VALUE: {
+          filters[key] = value;
+          break;
+        }
+        case ProductFiltersTypeEnum.REGEX: {
+          filters[key] = { $regex: `${value}` };
+          break;
+        }
+        default:
+          // TODO: Internal server error
+          throw new IncorrectFormatError(`Incorrect keyType ${keyType}`);
+      }
+    });
+
+    return filters;
   }
 
   private async getFilteredProducts(
@@ -134,8 +180,9 @@ export class ProductService {
     selectFields: string,
     withStockAmount: number
   ) {
+    const productsWithStockFilters = { ...filters, stock: { $gt: 0 } };
     const productsWithStock = await this._productRepository.getProducts(
-      filters,
+      productsWithStockFilters,
       sort,
       offset,
       limit,
@@ -152,6 +199,10 @@ export class ProductService {
 
     const products = [...productsWithStock, ...productsWithNoStock];
 
+    if (products.length === 0) {
+      throw new NotFoundError('Products with rovided properties do not exist');
+    }
+
     return products;
   }
 
@@ -163,7 +214,7 @@ export class ProductService {
     selectFields: string,
     withStockAmount: number
   ) {
-    if (withStockAmount - offset < limit) {
+    if (withStockAmount - offset >= limit) {
       return [];
     }
 
