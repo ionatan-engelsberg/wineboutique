@@ -36,21 +36,9 @@ export const UserSchema = new Schema<User>(
       minlength: 8,
       trim: true
     },
-    isVerified: {
-      type: Boolean,
-      default: false
-    },
     isActive: {
       type: Boolean,
       default: false
-    },
-    verificationToken: {
-      type: String,
-      default: null
-    },
-    verificationTokenExpirationDate: {
-      type: Date,
-      default: null
     },
     resetPasswordToken: {
       type: String,

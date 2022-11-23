@@ -10,7 +10,6 @@ import { CredentialsService } from './credentials.service';
 
 import { User } from '../interfaces';
 
-import { getVerifyAccountEmailHtml } from '../utils/emails/getVerifyAccountEmailHtml';
 import { getForgotPasswordEmailHtml } from '../utils/emails/getForgotPasswordHtml';
 
 const TEST_USER_EMAIL = 'mike.hammes90@ethereal.email';
@@ -34,27 +33,6 @@ export class EmailService {
 
     const info = await transporter.sendMail({ from, to: TEST_USER_EMAIL, subject, html });
     console.log('TODO - MESSAGE URL: ', nodemailer.getTestMessageUrl(info));
-  }
-
-  async sendVerifyAccountEmail(user: User) {
-    const { email: toEmail, _id: userId, verificationToken } = user;
-    const fromEmail = ETHEREAL_USERNAME;
-
-    if (!fromEmail) {
-      throw new InternalServerError('No email address configured to send an email');
-    }
-
-    // TODO
-    const subject = 'Verify account';
-
-    const hashedVerifyAccountInfo = await this._credentialsService.createVerifyAccountToken(
-      userId! as string,
-      verificationToken!
-    );
-
-    const html = getVerifyAccountEmailHtml(hashedVerifyAccountInfo);
-
-    await this.sendEmail(toEmail, fromEmail, subject, html);
   }
 
   async sendForgotPasswordEmail(user: User) {

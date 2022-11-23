@@ -44,11 +44,6 @@ export class SignUpDTO {
   phoneNumber?: number;
 }
 
-export class VerifyAccountDTO {
-  @IsOptional()
-  q!: string;
-}
-
 export class LoginDTO {
   @IsEmail()
   email!: string;

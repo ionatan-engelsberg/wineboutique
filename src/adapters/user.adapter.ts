@@ -25,9 +25,7 @@ export class UserAdapter {
 
     const omitFields = [
       'password',
-      'verificationToken',
       'resetPasswordToken',
-      'verificationTokenExpirationDate',
       'resetPasswordTokenExpirationDate',
       'createdAt',
       'updatedAt'
@@ -47,9 +45,7 @@ export class UserAdapter {
 
     const omitFields = [
       'password',
-      'verificationToken',
       'resetPasswordToken',
-      'verificationTokenExpirationDate',
       'resetPasswordTokenExpirationDate',
       'createdAt',
       'updatedAt'
@@ -68,7 +64,6 @@ export class UserAdapter {
       phoneNumber,
       role,
       password: '',
-      isVerified: false,
       isActive: false
     } as User;
 
@@ -78,9 +73,7 @@ export class UserAdapter {
 
     const omitFields = [
       'password',
-      'verificationToken',
       'resetPasswordToken',
-      'verificationTokenExpirationDate',
       'resetPasswordTokenExpirationDate',
       'createdAt',
       'updatedAt'
@@ -103,7 +96,6 @@ export class UserAdapter {
       role,
       userId,
       password: oldUser.password,
-      isVerified: oldUser.isVerified,
       isActive: oldUser.isActive
     } as User;
 
@@ -111,9 +103,7 @@ export class UserAdapter {
 
     const omitFields = [
       'password',
-      'verificationToken',
       'resetPasswordToken',
-      'verificationTokenExpirationDate',
       'resetPasswordTokenExpirationDate',
       'createdAt',
       'updatedAt'

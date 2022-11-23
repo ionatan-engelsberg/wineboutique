@@ -4,6 +4,7 @@ import { isEqual } from 'lodash';
 
 import {
   BadRequestError,
+  ConflictError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError
@@ -32,11 +33,9 @@ export class UserService {
   }
 
   async getUsersWithRole(user: User) {
-    const { role, isActive, isVerified } = user;
+    const { role, isActive } = user;
 
-    const validationsOK = isActive && isVerified;
-
-    if (!validationsOK) {
+    if (!isActive) {
       throw new UnauthorizedError('Private route');
     }
 
@@ -116,7 +115,11 @@ export class UserService {
       const { email } = newUser;
       existingUser = await this._userRepository.findOne({ email });
 
-      this._authService.validateExistingUser(existingUser);
+      const { isActive, _id: userId } = existingUser;
+      if (isActive) {
+        throw new ConflictError(`User with email ${email} already exists`, [{ userId }]);
+      }
+
       await this.updateExistingUserEmail(existingUser);
     } catch (error: any) {
       if (error.details && error.details[0].userId !== oldUser._id) {

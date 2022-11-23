@@ -19,8 +19,7 @@ import {
   LoginDTO,
   ResetPasswordBody,
   ResetPasswordDTO,
-  SignUpDTO,
-  VerifyAccountDTO
+  SignUpDTO
 } from '../dto/Auth.dto';
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
@@ -32,26 +31,22 @@ export class AuthController {
   @Post('/signup')
   @HttpCode(HttpStatusCode.CREATED)
   async signup(
-    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: SignUpDTO
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: SignUpDTO,
+    @Res() res: any
   ) {
-    return this._authAdapter.signup(body);
-  }
-
-  @Post('/verify_account')
-  @OnUndefined(HttpStatusCode.OK)
-  async verifyAccount(@QueryParams() dto: VerifyAccountDTO, @Res() res: any) {
-    const { token, cookieOptions } = await this._authAdapter.verifyAccount(dto);
+    const { user: newUser, token, cookieOptions } = await this._authAdapter.signup(body);
     res.cookie('token', token, { ...cookieOptions });
+    return { ...newUser };
   }
 
   @Post('/login')
-  @OnUndefined(HttpStatusCode.OK)
   async login(
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: LoginDTO,
     @Res() res: any
   ) {
-    const { token, cookieOptions } = await this._authAdapter.login(dto);
+    const { token, cookieOptions, name } = await this._authAdapter.login(dto);
     res.cookie('token', token, { ...cookieOptions });
+    return { name };
   }
 
   // TODO

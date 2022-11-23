@@ -16,13 +16,7 @@ export interface User {
 
   password: string;
 
-  isVerified: boolean;
-
   isActive: boolean;
-
-  verificationToken?: string | null;
-
-  verificationTokenExpirationDate?: Date | null;
 
   resetPasswordToken?: string | null;
 
