@@ -9,4 +9,6 @@ export interface UserJWT {
   userId: string;
 
   role: UserRole;
+
+  firstName: string;
 }

@@ -61,11 +61,8 @@ export class AuthService {
 
     try {
       user = await this.validateLoginCredentials(email, password);
-    } catch (error: any) {
-      if (!error.details) {
-        throw new ForbiddenError('Email or Password incorrect');
-      }
-      throw error;
+    } catch (error) {
+      throw new UnauthorizedError('Email or Password incorrect');
     }
 
     const cookies = await this._credentialsService.createUserCookies(user);
@@ -82,7 +79,7 @@ export class AuthService {
     const validationsOK = isPasswordCorrect && isActive;
 
     if (!validationsOK) {
-      throw new ForbiddenError('Email or Password incorrect');
+      throw new UnauthorizedError('Email or Password incorrect');
     }
 
     return user;

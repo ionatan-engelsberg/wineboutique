@@ -20,6 +20,9 @@ class UserJWT {
 
   @IsEnum(UserRole)
   role!: UserRole;
+
+  @IsString()
+  firstName!: string;
 }
 
 export class GetUsersWithRoleDTO extends UserJWT {}
@@ -127,4 +130,10 @@ export class UpdateUserPasswordDTO extends UpdateUserPasswordBody {
 
   @IsString()
   userId!: string;
+}
+
+export class GetCurrentUserDTO {
+  @IsOptional()
+  @IsObject()
+  userJWT?: UserJWT;
 }

@@ -20,8 +20,8 @@ export class DecodeUser implements ExpressMiddlewareInterface {
         return;
       }
 
-      const { userId, role } = decoded.data;
-      req.user = { userId, role } as UserJWT;
+      const { userId, role, firstName } = decoded.data;
+      req.user = { userId, role, firstName } as UserJWT;
     } catch (error) {
       console.log('WARNING: Error while decoding token:', error);
       await logErrors(error);

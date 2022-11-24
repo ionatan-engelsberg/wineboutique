@@ -17,7 +17,7 @@ import { UserRepository } from '../repositories/user.repository';
 
 import { User } from '../interfaces';
 import { ObjectId } from '../types/ObjectId';
-import { UserRole } from '../types/User.types';
+import { UserJWT, UserRole } from '../types/User.types';
 
 @Service({ transient: true })
 export class UserService {
@@ -174,5 +174,14 @@ export class UserService {
 
     user.password = this._credentialsService.hashString(password);
     await this._userRepository.update(user);
+  }
+
+  getCurrentUser(userJWT?: UserJWT) {
+    if (!userJWT) {
+      throw new UnauthorizedError('Private route');
+    }
+
+    const { firstName } = userJWT;
+    return { firstName };
   }
 }

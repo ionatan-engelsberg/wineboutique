@@ -6,6 +6,7 @@ import { UserService } from '../services/user.service';
 import {
   CreateUserWithRoleDTO,
   DeleteUserDTO,
+  GetCurrentUserDTO,
   GetUserByIdDTO,
   GetUsersWithRoleDTO,
   UpdateUserDTO,
@@ -127,5 +128,10 @@ export class UserAdapter {
     const user = await this._userService.findById(userJWT.userId);
 
     await this._userService.updateUserPassword(user, userId, password);
+  }
+
+  getCurrentUser(dto: GetCurrentUserDTO) {
+    const { userJWT } = dto;
+    return this._userService.getCurrentUser(userJWT);
   }
 }

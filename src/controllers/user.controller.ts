@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 import {
   Authorized,
   Body,
+  CookieParams,
   CurrentUser,
   Delete,
   Get,
@@ -9,7 +10,8 @@ import {
   OnUndefined,
   Param,
   Post,
-  Put
+  Put,
+  Req
 } from 'routing-controllers';
 
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
@@ -20,6 +22,7 @@ import {
   CreateUserWithRoleBody,
   CreateUserWithRoleDTO,
   DeleteUserDTO,
+  GetCurrentUserDTO,
   GetUserByIdDTO,
   GetUsersWithRoleDTO,
   UpdateUserBody,
@@ -39,6 +42,13 @@ export class UserController {
   async getUsersWithRole(@CurrentUser() userJWT: UserJWT) {
     const dto: GetUsersWithRoleDTO = userJWT;
     return this._userAdapter.getUsersWithRole(dto);
+  }
+
+  @Get('/current_user')
+  getCurrentUser(@Req() req: any) {
+    const userJWT = req.user;
+    const dto: GetCurrentUserDTO = { userJWT };
+    return this._userAdapter.getCurrentUser(dto);
   }
 
   @Get('/:userId')

@@ -52,7 +52,7 @@ export class CredentialsService {
   }
 
   async createUserCookies(user: User) {
-    const data = { userId: user._id! as string, role: user.role };
+    const data = { userId: user._id! as string, role: user.role, firstName: user.firstName };
 
     const token = await this.createToken(data, JWT_SECRET!, JWT_LIFETIME ?? '6h');
 
