@@ -39,6 +39,7 @@ export class SignUpDTO {
   @Match('password')
   checkPassword!: string;
 
+  // TODO: Send a code error
   @IsOptional()
   @IsPhoneNumber('AR')
   phoneNumber?: number;

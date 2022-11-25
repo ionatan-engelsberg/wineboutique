@@ -67,7 +67,7 @@ export class AuthService {
 
     const cookies = await this._credentialsService.createUserCookies(user);
 
-    return { ...cookies, name: user.firstName };
+    return { ...cookies, name: user.firstName, userId: user._id };
   }
 
   private async validateLoginCredentials(email: string, password: string) {

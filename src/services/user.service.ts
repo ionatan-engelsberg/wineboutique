@@ -181,7 +181,7 @@ export class UserService {
       throw new UnauthorizedError('Private route');
     }
 
-    const { firstName } = userJWT;
-    return { firstName };
+    const { firstName, userId } = userJWT;
+    return { firstName, userId };
   }
 }

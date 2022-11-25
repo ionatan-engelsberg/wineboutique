@@ -71,6 +71,7 @@ export class CredentialsService {
         : {
             httpOnly: false,
             secure: false,
+            expires: expirationDate,
             signed: true
           };
 
