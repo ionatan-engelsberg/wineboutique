@@ -68,6 +68,7 @@ export class UserController {
     return this._userAdapter.createUserWithRole(dto);
   }
 
+  // TODO: Role
   @Put('/:userId')
   @OnUndefined(HttpStatusCode.NO_CONTENT)
   async updateUser(

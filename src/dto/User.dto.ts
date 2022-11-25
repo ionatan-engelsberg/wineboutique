@@ -85,6 +85,7 @@ export class UpdateUserBody {
   @IsPhoneNumber('AR')
   phoneNumber?: number;
 
+  @IsOptional()
   @IsEnum(UserRole)
   // @ValidNewUserWithRole('role')
   role!: UserRole;
@@ -115,6 +116,9 @@ export class GetUserByIdDTO {
 }
 
 export class UpdateUserPasswordBody {
+  @IsString()
+  oldPassword!: string;
+
   @IsString()
   @ContainsLettersAndNumbers('password')
   password!: string;

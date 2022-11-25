@@ -49,7 +49,8 @@ export class UserAdapter {
       'resetPasswordToken',
       'resetPasswordTokenExpirationDate',
       'createdAt',
-      'updatedAt'
+      'updatedAt',
+      'role' // TODO: Depending on the role of the user making the request (service)
     ];
     return omit(user, omitFields);
   }
@@ -94,7 +95,7 @@ export class UserAdapter {
       lastName,
       email,
       birthdate: new Date(Date.now()), // TODO
-      role,
+      role: role ?? oldUser.role /* TODO */,
       userId,
       password: oldUser.password,
       isActive: oldUser.isActive
@@ -123,11 +124,11 @@ export class UserAdapter {
   }
 
   async updateUserPassword(dto: UpdateUserPasswordDTO) {
-    const { password, userJWT, userId } = dto;
+    const { oldPassword, password, userJWT, userId } = dto;
 
     const user = await this._userService.findById(userJWT.userId);
 
-    await this._userService.updateUserPassword(user, userId, password);
+    await this._userService.updateUserPassword(user, userId, oldPassword, password);
   }
 
   getCurrentUser(dto: GetCurrentUserDTO) {

@@ -163,16 +163,21 @@ export class UserService {
     await this._userRepository.deleteById(userToDelete._id!);
   }
 
-  async updateUserPassword(user: User, userId: string, password: string) {
+  async updateUserPassword(user: User, userId: string, oldPassword: string, newPassword: string) {
     if (!user.isActive || user._id !== userId) {
       throw new NotFoundError(`User with id ${user._id} does not exist`);
     }
 
-    if (user.password === password) {
+    const isOldPasswordCorrect = this._credentialsService.compareHash(oldPassword, user.password);
+    if (!isOldPasswordCorrect) {
+      throw new UnauthorizedError('Incorrect password');
+    }
+
+    if (user.password === newPassword) {
       return;
     }
 
-    user.password = this._credentialsService.hashString(password);
+    user.password = this._credentialsService.hashString(newPassword);
     await this._userRepository.update(user);
   }
 
