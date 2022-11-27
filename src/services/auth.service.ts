@@ -94,13 +94,9 @@ export class AuthService {
     }
 
     const token = randomBytes(TOKEN_RANDOM_BYTES).toString('hex');
-    user.resetPasswordToken = this._credentialsService.hashString(token as string);
 
-    const currentTimestamp = getCurrentDate().getTime();
-    const resetPasswordTokenExpirationTimestamp =
-      currentTimestamp + RESET_PASSWORD_TOKEN_VALIDATION_TIME;
-    const resetPasswordTokenExpirationDate = new Date(resetPasswordTokenExpirationTimestamp);
-    user.resetPasswordTokenExpirationDate = resetPasswordTokenExpirationDate;
+    user.resetPasswordToken = this._credentialsService.hashString(token as string);
+    user.resetPasswordTokenExpirationDate = this.getResetPasswordTokenExpirationDate();
 
     await this._userRepository.update(user);
 
@@ -118,6 +114,14 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  private getResetPasswordTokenExpirationDate() {
+    const currentTimestamp = getCurrentDate().getTime();
+    const resetPasswordTokenExpirationTimestamp =
+      currentTimestamp + RESET_PASSWORD_TOKEN_VALIDATION_TIME;
+
+    return new Date(resetPasswordTokenExpirationTimestamp);
   }
 
   async getUserToResetPassword(hashedInfo: string) {
