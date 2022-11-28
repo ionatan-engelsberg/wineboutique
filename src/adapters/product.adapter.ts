@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 
 import { ProductService } from '../services/product.service';
 
-import { GetProductsDTO } from '../dto/Product.dto';
+import { GetProductByIdDTO, GetProductsDTO } from '../dto/Product.dto';
 
 @Service({ transient: true })
 export class ProductAdapter {
@@ -13,7 +13,12 @@ export class ProductAdapter {
   }
 
   async getProducts(dto: GetProductsDTO) {
-    const { filters } = dto;
-    return this._productService.getProducts(filters);
+    const { filters, userJWT } = dto;
+    return this._productService.getProducts(filters, userJWT);
+  }
+
+  async getProductById(dto: GetProductByIdDTO) {
+    const { productId, userJWT } = dto;
+    return this._productService.getProductById(productId, userJWT);
   }
 }

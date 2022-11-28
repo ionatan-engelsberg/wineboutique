@@ -13,6 +13,7 @@ import {
 } from 'class-validator';
 
 import { GetProductsSort } from '../types/Product.types';
+import { UserJWT } from '../types/User.types';
 import { getCurrentDate } from '../utils/getCurrentDate';
 
 export class GetProductsFilters {
@@ -78,4 +79,17 @@ export class GetProductsFilters {
 export class GetProductsDTO {
   @IsObject()
   filters!: GetProductsFilters;
+
+  @IsOptional()
+  @IsObject()
+  userJWT?: UserJWT;
+}
+
+export class GetProductByIdDTO {
+  @IsString()
+  productId!: string;
+
+  @IsOptional()
+  @IsObject()
+  userJWT?: UserJWT;
 }

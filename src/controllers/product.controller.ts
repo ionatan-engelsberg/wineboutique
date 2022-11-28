@@ -1,11 +1,11 @@
 import { Service } from 'typedi';
-import { Get, HttpCode, JsonController, Post, QueryParams } from 'routing-controllers';
+import { Get, HttpCode, JsonController, Param, Post, QueryParams, Req } from 'routing-controllers';
 
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 import { ProductAdapter } from '../adapters/product.adapter';
 
-import { GetProductsDTO, GetProductsFilters } from '../dto/Product.dto';
+import { GetProductByIdDTO, GetProductsDTO, GetProductsFilters } from '../dto/Product.dto';
 
 @JsonController('/products')
 @Service({ transient: true })
@@ -21,9 +21,20 @@ export class ProductController {
   @HttpCode(HttpStatusCode.OK)
   async getProducts(
     @QueryParams({ validate: { whitelist: true, forbidNonWhitelisted: true } })
-    filters: GetProductsFilters
+    filters: GetProductsFilters,
+    @Req() req: any
   ) {
-    const dto: GetProductsDTO = { filters };
+    const userJWT = req.user;
+    const dto: GetProductsDTO = { filters, userJWT };
+
     return this._productAdapter.getProducts(dto);
+  }
+
+  @Get('/:productId')
+  async getProductById(@Req() req: any, @Param('productId') productId: string) {
+    const userJWT = req.user;
+    const dto: GetProductByIdDTO = { productId, userJWT };
+
+    return this._productAdapter.getProductById(dto);
   }
 }

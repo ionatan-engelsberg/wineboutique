@@ -20,10 +20,10 @@ export class BaseRepository<T> {
     this.modelName = this.BaseModel.modelName;
   }
 
-  async findById(objectId: ObjectId): Promise<T> {
+  async findById(objectId: ObjectId, fields?: string): Promise<T> {
     let obj: T | null;
     try {
-      obj = (await this.BaseModel.findById(objectId).lean()) as T;
+      obj = (await this.BaseModel.findById(objectId).select(fields).lean()) as T;
     } catch (error) {
       handleMongoError(error);
       obj = null;

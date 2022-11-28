@@ -14,9 +14,12 @@ import {
   ProductFiltersTypeEnum,
   ProductPriceParsedKey
 } from '../types/Product.types';
+import { ObjectId } from '../types/ObjectId';
+import { UserJWT, UserRole } from '../types/User.types';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
-const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined'; // TODO: Depending on UserRole
+const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined';
+const ROLE_USER_SELECT_FIELDS = '';
 
 @Service({ transient: true })
 export class ProductService {
@@ -62,13 +65,14 @@ export class ProductService {
     }
   }
 
-  async getProducts(receivedFilters: GetProductsFilters) {
+  async getProducts(receivedFilters: GetProductsFilters, user?: UserJWT) {
     const { page, sort: receivedSort, ...filterParams } = receivedFilters;
 
     const sort = GetProductsParsedSort[receivedSort];
     const limit = DEFAULT_GET_PRODUCTS_LIMIT;
     const offset = (page - 1) * limit;
-    const selectFields = DEFAULT_SELECT_FIELDS;
+    const selectFields =
+      user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
 
     const filters = this.getFilters(filterParams as GetProductsFilters);
     const aggregateQuery = this.getAggregateQuery(filters);
@@ -227,5 +231,12 @@ export class ProductService {
       newLimit,
       selectFields
     );
+  }
+
+  async getProductById(productId: ObjectId, user?: UserJWT) {
+    const selectFields =
+      user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+
+    return this._productRepository.findById(productId, selectFields);
   }
 }
