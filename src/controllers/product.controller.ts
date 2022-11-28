@@ -5,7 +5,12 @@ import { HttpStatusCode } from '../constants/HttpStatusCodes';
 
 import { ProductAdapter } from '../adapters/product.adapter';
 
-import { GetProductByIdDTO, GetProductsDTO, GetProductsFilters } from '../dto/Product.dto';
+import {
+  GetManyProductsByIdsDTO,
+  GetProductByIdDTO,
+  GetProductsDTO,
+  GetProductsFilters
+} from '../dto/Product.dto';
 
 @JsonController('/products')
 @Service({ transient: true })
@@ -28,6 +33,14 @@ export class ProductController {
     const dto: GetProductsDTO = { filters, userJWT };
 
     return this._productAdapter.getProducts(dto);
+  }
+
+  @Get('/many')
+  async getManyProductsByIds(
+    @QueryParams({ validate: { whitelist: true, forbidNonWhitelisted: true } })
+    dto: GetManyProductsByIdsDTO
+  ) {
+    return this._productAdapter.getManyProductsByIds(dto);
   }
 
   @Get('/:productId')

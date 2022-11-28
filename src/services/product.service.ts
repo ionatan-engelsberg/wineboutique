@@ -239,4 +239,10 @@ export class ProductService {
 
     return this._productRepository.findById(productId, selectFields);
   }
+
+  async getManyProductsByIds(productIds: ObjectId[]) {
+    const filterQuery = { _id: { $in: productIds } };
+
+    return this._productRepository.findMany(filterQuery);
+  }
 }

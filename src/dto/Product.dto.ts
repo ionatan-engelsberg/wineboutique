@@ -93,3 +93,12 @@ export class GetProductByIdDTO {
   @IsObject()
   userJWT?: UserJWT;
 }
+
+export class GetManyProductsByIdsDTO {
+  @IsOptional()
+  @Transform((value) => value[0].split(',').map((val: string) => val.trim()))
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  productIds!: string[];
+}
