@@ -155,10 +155,6 @@ export class ProductService {
           filters[parsedKey] = { $gte: value };
           break;
         }
-        case ProductFiltersTypeEnum.VALUE: {
-          filters[key] = value;
-          break;
-        }
         case ProductFiltersTypeEnum.REGEX: {
           filters[key] = { $regex: `${value}` };
           break;

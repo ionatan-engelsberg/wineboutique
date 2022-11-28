@@ -63,8 +63,10 @@ export class GetProductsFilters {
   maxPrice?: number;
 
   @IsOptional()
-  @Transform((value) => value.trim().toUpperCase())
-  @IsString()
+  @Transform((value) => value[0].split(',').map((val: string) => val.trim().toUpperCase()))
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
   type?: string;
 
   @IsOptional()
