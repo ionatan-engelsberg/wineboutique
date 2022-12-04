@@ -32,4 +32,4 @@ export const MONGODB_URI = `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD
 
 export const { ETHEREAL_USERNAME, ETHEREAL_PASSWORD } = process.env;
 
-export const { DEFAULT_PRODUCT_IMAGE_URL } = process.env;
+export const { DEFAULT_PRODUCT_IMAGE_URL, DEFAULT_BLOG_IMAGE_URL } = process.env;

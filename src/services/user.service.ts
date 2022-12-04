@@ -41,8 +41,9 @@ export class UserService {
 
     const filters = { role: { $gte: role, $ne: UserRole.USER } };
     const sort = { role: 1 };
+    const options = { sort };
 
-    return this._userRepository.findMany(filters, sort);
+    return this._userRepository.findMany(filters, options);
   }
 
   getUserById(user: User, userToGet: User) {

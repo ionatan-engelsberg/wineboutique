@@ -8,6 +8,7 @@ import { handleMongoError } from '../errors/handleMongoError';
 import { replaceIds } from '../utils/replaceIds';
 import { ObjectId } from '../types/ObjectId';
 import { logErrors } from '../utils/logger';
+import { FindManyOptions } from '../types/Repository.types';
 
 @Service({ transient: true })
 export class BaseRepository<T> {
@@ -48,16 +49,32 @@ export class BaseRepository<T> {
     return replaceIds(obj) as T;
   }
 
-  async findMany(params: Object, sort?: any): Promise<T[]> {
+  async findMany(params: Object, options?: FindManyOptions): Promise<T[]> {
     let objs: T[] | null;
     try {
-      objs = (await this.BaseModel.find(params).sort(sort).lean()) as T[];
+      objs = (await this.BaseModel.find(params)
+        .sort(options?.sort)
+        .skip(options?.offset as number)
+        .limit(options?.limit as number)
+        .lean()) as T[];
     } catch (error) {
       console.log(`WARNING: There was an error while finding ${this.modelName}s`);
       logErrors(error);
       objs = [];
     }
     return objs.map((obj: T) => replaceIds(obj) as T);
+  }
+
+  async countDocuments(params: Object): Promise<number> {
+    let count: number | undefined;
+    try {
+      count = await this.BaseModel.countDocuments(params);
+    } catch (error) {
+      console.log(`WARNING: There was an error while counting ${this.modelName}s`);
+      logErrors(error);
+      count = 0;
+    }
+    return count;
   }
 
   async create(object: T): Promise<T> {
