@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class GetBlogsDTO {
   @IsNumber()
@@ -9,4 +9,9 @@ export class GetBlogsDTO {
   @IsNumber()
   @Min(1)
   limit?: number;
+}
+
+export class GetBlogByIdDTO {
+  @IsString()
+  blogId!: string;
 }

@@ -3,6 +3,8 @@ import uniqid from 'uniqid';
 
 import { BlogRepository } from '../repositories/blog.repository';
 
+import { ObjectId } from '../types/ObjectId';
+
 import { getCurrentDate } from '../utils/getCurrentDate';
 
 const DEFAULT_LIMIT = 6;
@@ -49,5 +51,9 @@ export class BlogService {
     const totalPages = Math.ceil(totalCount / limit);
 
     return { totalPages, blogs };
+  }
+
+  async getBlogById(blogId: ObjectId) {
+    return this._blogRepository.findById(blogId);
   }
 }

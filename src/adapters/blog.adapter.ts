@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 
 import { BlogService } from '../services/blog.service';
 
-import { GetBlogsDTO } from '../dto/Blog.dto';
+import { GetBlogByIdDTO, GetBlogsDTO } from '../dto/Blog.dto';
 
 @Service({ transient: true })
 export class BlogAdapter {
@@ -15,5 +15,10 @@ export class BlogAdapter {
   async getBlogs(dto: GetBlogsDTO) {
     const { page, limit } = dto;
     return this._blogService.getBlogs(page, limit);
+  }
+
+  async getBlogById(dto: GetBlogByIdDTO) {
+    const { blogId } = dto;
+    return this._blogService.getBlogById(blogId);
   }
 }
