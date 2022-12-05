@@ -21,7 +21,7 @@ export class BlogService {
 
       let text = '';
       let j = 0;
-      while (j < 50) {
+      while (j < 250) {
         const subtext = uniqid();
         text = `${text} ${subtext}`;
         j += 1;
