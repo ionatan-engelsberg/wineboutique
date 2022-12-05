@@ -1,6 +1,11 @@
-import { IsEmail } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
-export class SuscribteToNewsletterDTO {
+export class SuscribeToNewsletterDTO {
   @IsEmail()
+  email!: string;
+}
+
+export class UnsuscribeFromNewsletterDTO {
+  @IsString()
   email!: string;
 }

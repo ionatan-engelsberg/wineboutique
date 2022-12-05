@@ -36,4 +36,31 @@ export class NewsletterService {
     newsletter.emails.push(email);
     await this._newsletterRepository.update(newsletter);
   }
+
+  async unsuscribeFromNewsletter(email: string) {
+    let newsletter: Newsletter;
+
+    // TODO
+    try {
+      const newsletters = await this._newsletterRepository.findMany({});
+
+      if (!newsletters || newsletters.length === 0) {
+        return;
+      }
+
+      newsletter = newsletters[0];
+    } catch (error) {
+      return;
+    }
+
+    const isEmailInNewsletter = newsletter.emails.find((e) => e === email);
+
+    if (!isEmailInNewsletter) {
+      return;
+    }
+
+    newsletter.emails = newsletter.emails.filter((e) => e !== email);
+
+    await this._newsletterRepository.update(newsletter);
+  }
 }
