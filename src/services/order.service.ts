@@ -9,6 +9,8 @@ import {
 } from '../constants/Order';
 import { IncorrectFormatError } from '../errors/base.error';
 
+import { EmailService } from './email.service';
+
 import { OrderRepository } from '../repositories/order.repository';
 import { ProductRepository } from '../repositories/product.repository';
 
@@ -25,6 +27,8 @@ import {
 @Service({ transient: true })
 export class OrderService {
   constructor(
+    private readonly _emailService: EmailService,
+
     private readonly _orderRepository: OrderRepository,
     private readonly _productRepository: ProductRepository
   ) {}
@@ -66,9 +70,9 @@ export class OrderService {
     } as Order;
 
     await this.createOrderAndUpdateProducts(newOrder);
+    await this._emailService.sendNewOrderEmailToAdmin(user, newOrder);
+    await this._emailService.sendNewOrderEmailToCustomer(user, newOrder);
 
-    // TODO: Send email to Customer
-    // TODO: Send email to Admin
     // TODO: Payment Gateway
   }
 

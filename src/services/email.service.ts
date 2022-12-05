@@ -8,9 +8,11 @@ import { ETHEREAL_USERNAME, ETHEREAL_PASSWORD } from '../config/config';
 
 import { CredentialsService } from './credentials.service';
 
-import { User } from '../interfaces';
+import { Order, User } from '../interfaces';
 
 import { getForgotPasswordEmailHtml } from '../utils/emails/getForgotPasswordHtml';
+import { getAdminNewOrderHtml } from '../utils/emails/getAdminNewOrderHtml';
+import { getCustomerNewOrderHtml } from '../utils/emails/getCustomerNewOrderHtml';
 
 const TEST_USER_EMAIL = 'mike.hammes90@ethereal.email';
 // TEST_USER_PASSWORD = '6YhpDkG6yv5xEhGE6y'
@@ -45,13 +47,44 @@ export class EmailService {
 
     // TODO
     const subject = 'Reset password';
-
     const hashedResetPasswordInfo = await this._credentialsService.createResetPasswordToken(
       userId! as string,
       resetPasswordToken!
     );
-
     const html = getForgotPasswordEmailHtml(hashedResetPasswordInfo);
+
+    await this.sendEmail(toEmail, fromEmail, subject, html);
+  }
+
+  async sendNewOrderEmailToAdmin(user: User, order: Order) {
+    const fromEmail = ETHEREAL_USERNAME;
+
+    if (!fromEmail) {
+      throw new InternalServerError('No email address configured to send an email');
+    }
+
+    // TODO
+    const subject = 'Nueva orden';
+    // todo: order._id is undefined
+    const html = getAdminNewOrderHtml(user._id!, order._id!);
+
+    await this.sendEmail(TEST_USER_EMAIL, fromEmail, subject, html);
+  }
+
+  async sendNewOrderEmailToCustomer(user: User, order: Order) {
+    const { email: toEmail } = user;
+
+    const fromEmail = ETHEREAL_USERNAME;
+    if (!fromEmail) {
+      throw new InternalServerError('No email address configured to send an email');
+    }
+
+    const { orderNumber } = order;
+
+    // TODO
+    const subject = `Wine Boutique - Compra N° ${orderNumber}`;
+    // todo: order._id is undefined
+    const html = getCustomerNewOrderHtml(user._id!, toEmail, order._id!);
 
     await this.sendEmail(toEmail, fromEmail, subject, html);
   }
