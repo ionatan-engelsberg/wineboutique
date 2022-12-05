@@ -1,7 +1,41 @@
 import { Schema, model } from 'mongoose';
 
-import { Order, OrderItem, OrderAddress } from '../interfaces';
-import { OrderPaymentMethod, OrderStatus, OrderTaxStatus } from '../types/Order.types';
+import { Order, OrderItem, OrderAddress, OrderPayer } from '../interfaces';
+import {
+  OrderAddressCity,
+  OrderPaymentMethod,
+  OrderStatus,
+  OrderTaxStatus
+} from '../types/Order.types';
+
+const OrderPayerSchema = new Schema<OrderPayer>(
+  {
+    firstName: {
+      type: String,
+      required: [true, 'Payer first name is required']
+    },
+    lastName: {
+      type: String,
+      required: [true, 'Payer last name is required']
+    },
+    identification: {
+      type: Number,
+      required: [true, 'Payer identification is required']
+    },
+    taxStatus: {
+      type: String,
+      required: [true, 'Order tax status is required'],
+      enum: {
+        values: Object.values(OrderTaxStatus),
+        message: `Order tax status must be one of the following: ${Object.values(OrderTaxStatus)}`
+      }
+    },
+    businessName: {
+      type: String
+    }
+  },
+  { versionKey: false }
+);
 
 const OrderItemSchema = new Schema<OrderItem>(
   {
@@ -34,6 +68,18 @@ const OrderItemSchema = new Schema<OrderItem>(
 
 const OrderAddressSchema = new Schema<OrderAddress>(
   {
+    city: {
+      type: String,
+      required: [true, 'Address city is required'],
+      enum: {
+        values: Object.values(OrderAddressCity),
+        message: `Address city must be one of the following: ${Object.values(OrderAddressCity)}`
+      }
+    },
+    locality: {
+      type: String,
+      required: [true, 'Address locality is required']
+    },
     street: {
       type: String,
       required: [true, 'Address street is required']
@@ -61,6 +107,11 @@ export const OrderSchema = new Schema<Order>(
       ref: 'User',
       required: [true, 'Order user is required']
     },
+    payer: {
+      type: OrderPayerSchema,
+      required: [true, 'Order payer is required'],
+      _id: false
+    },
     items: {
       type: [OrderItemSchema],
       required: [true, 'Order items are required'],
@@ -85,14 +136,6 @@ export const OrderSchema = new Schema<Order>(
       type: Number,
       required: [true, 'Order total is required'],
       min: 0
-    },
-    taxStatus: {
-      type: String,
-      required: [true, 'Order tax status is required'],
-      enum: {
-        values: Object.values(OrderTaxStatus),
-        message: `Order tax status must be one of the following: ${Object.values(OrderTaxStatus)}`
-      }
     },
     orderNumber: {
       type: Number,

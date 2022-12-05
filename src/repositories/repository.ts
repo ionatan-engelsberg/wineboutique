@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 
 import { DatabaseErrorMessages } from '../constants/ErrorMessages';
 import { DatabaseError, NotFoundError } from '../errors/base.error';
@@ -123,5 +123,9 @@ export class BaseRepository<T> {
       throw new DatabaseError(`${this.modelName} with id ${objectId} does not exist`);
     }
     return replaceIds(dbObj) as T;
+  }
+
+  async createSessionForTransaction() {
+    return mongoose.startSession();
   }
 }

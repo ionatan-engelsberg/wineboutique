@@ -10,4 +10,6 @@ export class OrderRepository extends BaseRepository<Order> {
   constructor() {
     super(OrderModel);
   }
+
+  
 }

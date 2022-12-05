@@ -21,20 +21,18 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
     // TODO: Better implementation
     if (errors) {
       message = ErrorMessages.BAD_REQUEST;
-      if (errors[0].constraints.code) {
-        const code = errors[0].constraints.code;
-        description = ErrorDescriptions[code];
-        details = [{ code }];
-      } else {
-        description = errors[0];
-      }
+      description =
+        'Some properties are either missing or incorrect. Check all required values are included and in a correct format';
+      details = errors[0];
     }
 
+    // TODO
     if (error.name === 'MulterError') {
       // TODO: Check more multer errors?
       description = 'There has been an error while uploading requested files';
     }
 
+    // TODO
     try {
       res.status(status).json({ message, description: description!, details: details! });
     } catch (err: any) {

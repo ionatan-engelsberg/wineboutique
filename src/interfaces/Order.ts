@@ -1,5 +1,22 @@
 import { ObjectId } from '../types/ObjectId';
-import { OrderPaymentMethod, OrderStatus, OrderTaxStatus } from '../types/Order.types';
+import {
+  OrderAddressCity,
+  OrderPaymentMethod,
+  OrderStatus,
+  OrderTaxStatus
+} from '../types/Order.types';
+
+export interface OrderPayer {
+  firstName: string;
+
+  lastName: string;
+
+  identification: number;
+
+  taxStatus: OrderTaxStatus;
+
+  businessName?: string;
+}
 
 export interface OrderItem {
   productId: ObjectId;
@@ -14,19 +31,25 @@ export interface OrderItem {
 }
 
 export interface OrderAddress {
+  city: OrderAddressCity;
+
+  locality: string;
+
   street: string;
 
-  number: string | number;
+  number: string;
 
-  floor?: string | number;
+  floor?: string;
 
-  apartment?: string | number;
+  apartment?: string;
 }
 
 export interface Order {
   _id?: ObjectId;
 
   user: ObjectId;
+
+  payer: OrderPayer;
 
   items: OrderItem[];
 
@@ -37,8 +60,6 @@ export interface Order {
   discount: number;
 
   total: number;
-
-  taxStatus: OrderTaxStatus;
 
   orderNumber: number;
 
