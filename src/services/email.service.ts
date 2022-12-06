@@ -13,6 +13,7 @@ import { Order, User } from '../interfaces';
 import { getForgotPasswordEmailHtml } from '../utils/emails/getForgotPasswordHtml';
 import { getAdminNewOrderHtml } from '../utils/emails/getAdminNewOrderHtml';
 import { getCustomerNewOrderHtml } from '../utils/emails/getCustomerNewOrderHtml';
+import { getContactMessageHtml } from '../utils/emails/getContactMessageHtml';
 
 const TEST_USER_EMAIL = 'mike.hammes90@ethereal.email';
 // TEST_USER_PASSWORD = '6YhpDkG6yv5xEhGE6y'
@@ -35,6 +36,27 @@ export class EmailService {
 
     const info = await transporter.sendMail({ from, to: TEST_USER_EMAIL, subject, html });
     console.log('TODO - MESSAGE URL: ', nodemailer.getTestMessageUrl(info));
+  }
+
+  async sendContactEmail(
+    firstName: string,
+    lastName: string,
+    email: string,
+    subject: string,
+    message: string
+  ) {
+    const fromEmail = ETHEREAL_USERNAME;
+
+    if (!fromEmail) {
+      throw new InternalServerError('No email address configured to send an email');
+    }
+
+    // TODO
+    const fullSubject = `Contact Message: ${subject}`;
+
+    const html = getContactMessageHtml(email, firstName, lastName, message);
+
+    await this.sendEmail(TEST_USER_EMAIL, fromEmail, fullSubject, html);
   }
 
   async sendForgotPasswordEmail(user: User) {

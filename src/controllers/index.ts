@@ -4,6 +4,7 @@ import { ProductController } from './product.controller';
 import { BlogController } from './blog.controller';
 import { NewsletterController } from './newsletter.controller';
 import { OrderController } from './order.controller';
+import { EmailController } from './email.controller';
 
 export const controllers = [
   AuthController,
@@ -11,5 +12,6 @@ export const controllers = [
   ProductController,
   BlogController,
   NewsletterController,
-  OrderController
+  OrderController,
+  EmailController
 ];
