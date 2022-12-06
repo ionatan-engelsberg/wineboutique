@@ -4,4 +4,6 @@ export interface FindManyOptions {
   limit?: number;
 
   offset?: number;
+
+  fields?: string;
 }

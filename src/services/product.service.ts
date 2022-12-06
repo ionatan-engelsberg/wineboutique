@@ -249,7 +249,10 @@ export class ProductService {
   async getFeaturedProducts(filters: GetFeaturedProductsFilters, user?: UserJWT) {
     const selectFields =
       user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+    const options = { fields: selectFields };
 
-    return this._productRepository.findMany(filters);
+    const parsedFilters = { ...filters, stock: { $gt: 0 } };
+
+    return this._productRepository.findMany(parsedFilters, options);
   }
 }

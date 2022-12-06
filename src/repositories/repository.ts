@@ -56,6 +56,7 @@ export class BaseRepository<T> {
         .sort(options?.sort)
         .skip(options?.offset as number)
         .limit(options?.limit as number)
+        .select(options?.fields)
         .lean()) as T[];
     } catch (error) {
       console.log(`WARNING: There was an error while finding ${this.modelName}s`);
