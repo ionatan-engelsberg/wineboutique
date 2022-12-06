@@ -6,7 +6,7 @@ import { IncorrectFormatError, NotFoundError } from '../errors/base.error';
 
 import { ProductRepository } from '../repositories/product.repository';
 
-import { GetProductsFilters } from '../dto/Product.dto';
+import { GetFeaturedProductsFilters, GetProductsFilters } from '../dto/Product.dto';
 import {
   GetProductsParsedSort,
   ProductFilters,
@@ -244,5 +244,12 @@ export class ProductService {
     const filterQuery = { _id: { $in: productIds } };
 
     return this._productRepository.findMany(filterQuery);
+  }
+
+  async getFeaturedProducts(filters: GetFeaturedProductsFilters, user?: UserJWT) {
+    const selectFields =
+      user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+
+    return this._productRepository.findMany(filters);
   }
 }

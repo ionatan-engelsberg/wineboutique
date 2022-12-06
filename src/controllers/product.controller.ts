@@ -6,6 +6,8 @@ import { HttpStatusCode } from '../constants/HttpStatusCodes';
 import { ProductAdapter } from '../adapters/product.adapter';
 
 import {
+  GetFeaturedProductsDTO,
+  GetFeaturedProductsFilters,
   GetManyProductsByIdsDTO,
   GetProductByIdDTO,
   GetProductsDTO,
@@ -41,6 +43,18 @@ export class ProductController {
     dto: GetManyProductsByIdsDTO
   ) {
     return this._productAdapter.getManyProductsByIds(dto);
+  }
+
+  @Get('/featured')
+  async getFeaturedProducts(
+    @QueryParams({ validate: { whitelist: true, forbidNonWhitelisted: true } })
+    filters: GetFeaturedProductsFilters,
+    @Req() req: any
+  ) {
+    const userJWT = req.user;
+    const dto: GetFeaturedProductsDTO = { filters, userJWT };
+
+    return this._productAdapter.getFeaturedProducts(dto);
   }
 
   @Get('/:productId')

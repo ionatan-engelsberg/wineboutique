@@ -3,7 +3,12 @@ import { omit } from 'lodash';
 
 import { ProductService } from '../services/product.service';
 
-import { GetManyProductsByIdsDTO, GetProductByIdDTO, GetProductsDTO } from '../dto/Product.dto';
+import {
+  GetFeaturedProductsDTO,
+  GetManyProductsByIdsDTO,
+  GetProductByIdDTO,
+  GetProductsDTO
+} from '../dto/Product.dto';
 
 @Service({ transient: true })
 export class ProductAdapter {
@@ -30,5 +35,10 @@ export class ProductAdapter {
 
     const omitFields = ['description', 'featuredInHome', 'outlined'];
     return products.map((prod) => omit(prod, omitFields));
+  }
+
+  async getFeaturedProducts(dto: GetFeaturedProductsDTO) {
+    const { filters, userJWT } = dto;
+    return this._productService.getFeaturedProducts(filters, userJWT);
   }
 }

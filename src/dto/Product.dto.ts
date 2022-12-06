@@ -2,6 +2,7 @@ import { Transform } from 'class-transformer';
 import {
   ArrayUnique,
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
@@ -101,4 +102,23 @@ export class GetManyProductsByIdsDTO {
   @ArrayUnique()
   @IsString({ each: true })
   productIds!: string[];
+}
+
+export class GetFeaturedProductsFilters {
+  @IsOptional()
+  @IsBoolean()
+  featuredInHome?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  outlined?: boolean;
+}
+
+export class GetFeaturedProductsDTO {
+  @IsObject()
+  filters!: GetFeaturedProductsFilters;
+
+  @IsOptional()
+  @IsObject()
+  userJWT?: UserJWT;
 }
