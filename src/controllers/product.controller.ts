@@ -37,6 +37,11 @@ export class ProductController {
     return this._productAdapter.getProducts(dto);
   }
 
+  @Get('/filters')
+  async getAvailableFilters() {
+    return this._productAdapter.getAvailableFilters();
+  }
+
   @Get('/many')
   async getManyProductsByIds(
     @QueryParams({ validate: { whitelist: true, forbidNonWhitelisted: true } })

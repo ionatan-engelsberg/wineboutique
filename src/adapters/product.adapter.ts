@@ -23,6 +23,10 @@ export class ProductAdapter {
     return this._productService.getProducts(filters, userJWT);
   }
 
+  async getAvailableFilters() {
+    return this._productService.getAvailableFilters();
+  }
+
   async getProductById(dto: GetProductByIdDTO) {
     const { productId, userJWT } = dto;
     return this._productService.getProductById(productId, userJWT);

@@ -75,9 +75,8 @@ export class ProductService {
       user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
 
     const filters = this.getFilters(filterParams as GetProductsFilters);
-    const aggregateQuery = this.getAggregateQuery(filters);
+    const { total, withStock } = await this.getProductsCount(filters);
 
-    const { total, withStock, ...uniqueFilters } = await this.getFiltersInfo(aggregateQuery);
     const products = await this.getFilteredProducts(
       filters,
       sort,
@@ -88,48 +87,61 @@ export class ProductService {
     );
     const totalPages = Math.ceil(total / limit);
 
-    return { totalPages, filters: uniqueFilters, products };
+    return { totalPages, products };
   }
 
-  private getAggregateQuery(filters: Object) {
-    const match = { $match: { ...filters } };
+  private async getProductsCount(filters: Object) {
+    const countQuery = this.getStockCountQuery(filters);
+    const { total, withStock } = await this.getProductsAdditionalInfo(countQuery);
 
-    const filterValues = Object.values(ProductFilters);
-    const uniqueFilters = this.getUniqueFiltersAggregation(filterValues);
-    const countFilters = this.getCountFiltersAggregation();
+    return { total, withStock };
+  }
+
+  private getStockCountQuery(filters: Object) {
+    const withStock = {
+      withStock: { $sum: { $cond: { if: { $gt: ['$stock', 0] }, then: 1, else: 0 } } }
+    };
+    const total = { total: { $count: {} } };
+
+    const countFilters = { ...withStock, ...total };
+
+    return this.getGroupAggregation(filters, countFilters);
+  }
+
+  async getAvailableFilters() {
+    const availableFiltersQuery = this.getAvailableFiltersQuery();
+    const availableFilters = await this.getProductsAdditionalInfo(availableFiltersQuery);
+
+    return { filters: availableFilters };
+  }
+
+  private getAvailableFiltersQuery() {
+    const filterKeys = Object.values(ProductFilters);
+    const addToSetObject: any = {};
+
+    filterKeys.forEach((key) => {
+      addToSetObject[key] = { $addToSet: `$${key}` };
+    });
+
+    return this.getGroupAggregation({}, addToSetObject);
+  }
+
+  private getGroupAggregation(filters: Object, aggregationQuery: Object) {
+    const match = { $match: { ...filters } };
 
     const filtersInfo = {
       $group: {
         _id: 'filters',
-        ...uniqueFilters,
-        ...countFilters
+        ...aggregationQuery
       }
     };
 
     return [match, filtersInfo];
   }
 
-  private getUniqueFiltersAggregation(filters: ProductFilters[]) {
-    const addToSetObject: any = {};
-    filters.forEach((key) => {
-      addToSetObject[key] = { $addToSet: `$${key}` };
-    });
-
-    return addToSetObject;
-  }
-
-  private getCountFiltersAggregation() {
-    const withStock = {
-      withStock: { $sum: { $cond: { if: { $gt: ['$stock', 0] }, then: 1, else: 0 } } }
-    };
-    const total = { total: { $count: {} } };
-
-    return { ...withStock, ...total };
-  }
-
-  private async getFiltersInfo(aggregateQuery: Object[]) {
-    const rawFilters = await this._productRepository.getProductsFilters(aggregateQuery);
-    return omit(rawFilters[0], '_id');
+  private async getProductsAdditionalInfo(aggregateQuery: Object[]) {
+    const rawInfo = await this._productRepository.getProductsAdditionalInfo(aggregateQuery);
+    return omit(rawInfo[0], '_id');
   }
 
   private getFilters(filtersParams: GetProductsFilters) {

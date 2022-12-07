@@ -15,7 +15,7 @@ export class ProductRepository extends BaseRepository<Product> {
     super(ProductModel);
   }
 
-  async getProductsFilters(aggregateQuery: any[]): Promise<any> {
+  async getProductsAdditionalInfo(aggregateQuery: any[]): Promise<any> {
     let filters: any;
     try {
       filters = await ProductModel.aggregate(aggregateQuery);

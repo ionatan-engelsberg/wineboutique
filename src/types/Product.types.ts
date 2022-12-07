@@ -2,8 +2,8 @@ export enum ProductFilters {
   BRAND = 'brand',
   GRAPE = 'grape',
   YEAR = 'year',
-  REGION = 'region',
-  TYPE = 'type'
+  REGION = 'region'
+  // TYPE = 'type'
 }
 
 export enum GetProductsSort {
