@@ -8,6 +8,8 @@ import { ProductAdapter } from '../adapters/product.adapter';
 import {
   GetFeaturedProductsDTO,
   GetFeaturedProductsFilters,
+  GetAvailableFilters,
+  GetAvailableFiltersDTO,
   GetManyProductsByIdsDTO,
   GetProductByIdDTO,
   GetProductsDTO,
@@ -38,8 +40,12 @@ export class ProductController {
   }
 
   @Get('/filters')
-  async getAvailableFilters() {
-    return this._productAdapter.getAvailableFilters();
+  async getAvailableFilters(
+    @QueryParams({ validate: { whitelist: true, forbidNonWhitelisted: true } })
+    filters: GetAvailableFilters
+  ) {
+    const dto: GetAvailableFiltersDTO = { filters };
+    return this._productAdapter.getAvailableFilters(dto);
   }
 
   @Get('/many')

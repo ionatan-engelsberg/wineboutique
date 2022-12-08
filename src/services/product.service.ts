@@ -6,8 +6,13 @@ import { IncorrectFormatError, NotFoundError } from '../errors/base.error';
 
 import { ProductRepository } from '../repositories/product.repository';
 
-import { GetFeaturedProductsFilters, GetProductsFilters } from '../dto/Product.dto';
 import {
+  GetFeaturedProductsFilters,
+  GetAvailableFilters,
+  GetProductsFilters
+} from '../dto/Product.dto';
+import {
+  ProductsAdditionalInfoObject,
   GetProductsParsedSort,
   ProductFilters,
   ProductFiltersType,
@@ -83,9 +88,9 @@ export class ProductService {
       offset,
       limit,
       selectFields,
-      withStock
+      withStock!
     );
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total! / limit);
 
     return { totalPages, products };
   }
@@ -108,14 +113,15 @@ export class ProductService {
     return this.getGroupAggregation(filters, countFilters);
   }
 
-  async getAvailableFilters() {
-    const availableFiltersQuery = this.getAvailableFiltersQuery();
+  async getAvailableFilters(receivedFilters: GetAvailableFilters) {
+    const filters = this.getFilters(receivedFilters);
+    const availableFiltersQuery = this.getAvailableFiltersQuery(filters);
     const availableFilters = await this.getProductsAdditionalInfo(availableFiltersQuery);
 
     return { filters: availableFilters };
   }
 
-  private getAvailableFiltersQuery() {
+  private getAvailableFiltersQuery(filters: GetAvailableFilters) {
     const filterKeys = Object.values(ProductFilters);
     const addToSetObject: any = {};
 
@@ -123,7 +129,7 @@ export class ProductService {
       addToSetObject[key] = { $addToSet: `$${key}` };
     });
 
-    return this.getGroupAggregation({}, addToSetObject);
+    return this.getGroupAggregation(filters, addToSetObject);
   }
 
   private getGroupAggregation(filters: Object, aggregationQuery: Object) {
@@ -141,10 +147,21 @@ export class ProductService {
 
   private async getProductsAdditionalInfo(aggregateQuery: Object[]) {
     const rawInfo = await this._productRepository.getProductsAdditionalInfo(aggregateQuery);
-    return omit(rawInfo[0], '_id');
+    const parsedInfo = omit(rawInfo[0], '_id');
+
+    const filtersObject: ProductsAdditionalInfoObject = {};
+    for (const filterKey in parsedInfo) {
+      const values = parsedInfo[filterKey];
+
+      if (values.length > 0) {
+        filtersObject[filterKey] = values;
+      }
+    }
+
+    return filtersObject;
   }
 
-  private getFilters(filtersParams: GetProductsFilters) {
+  private getFilters(filtersParams: GetProductsFilters | GetAvailableFilters) {
     const receivedFilters = Object.entries(filtersParams);
     const filters = {};
 

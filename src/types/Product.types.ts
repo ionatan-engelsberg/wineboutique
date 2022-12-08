@@ -1,9 +1,26 @@
 export enum ProductFilters {
   BRAND = 'brand',
   GRAPE = 'grape',
-  YEAR = 'year',
-  REGION = 'region'
-  // TYPE = 'type'
+  // TODO: Delete
+  // YEAR = 'year',
+  // REGION = 'region',
+  TYPE = 'type'
+}
+
+export interface ProductsAdditionalInfoObject {
+  total?: number;
+
+  withStock?: number;
+
+  brand?: string[];
+
+  grape?: string[];
+
+  year?: string[];
+
+  region?: string[];
+
+  type?: string[];
 }
 
 export enum GetProductsSort {

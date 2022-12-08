@@ -5,6 +5,7 @@ import { ProductService } from '../services/product.service';
 
 import {
   GetFeaturedProductsDTO,
+  GetAvailableFiltersDTO,
   GetManyProductsByIdsDTO,
   GetProductByIdDTO,
   GetProductsDTO
@@ -23,8 +24,9 @@ export class ProductAdapter {
     return this._productService.getProducts(filters, userJWT);
   }
 
-  async getAvailableFilters() {
-    return this._productService.getAvailableFilters();
+  async getAvailableFilters(dto: GetAvailableFiltersDTO) {
+    const { filters } = dto;
+    return this._productService.getAvailableFilters(filters);
   }
 
   async getProductById(dto: GetProductByIdDTO) {

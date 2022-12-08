@@ -69,7 +69,7 @@ export class GetProductsFilters {
   @IsArray()
   @ArrayUnique()
   @IsString({ each: true })
-  type?: string;
+  type?: string[];
 
   @IsOptional()
   @Transform((value) => value.trim().toUpperCase())
@@ -121,4 +121,18 @@ export class GetFeaturedProductsDTO {
   @IsOptional()
   @IsObject()
   userJWT?: UserJWT;
+}
+
+export class GetAvailableFilters {
+  @IsOptional()
+  @Transform((value) => value[0].split(',').map((val: string) => val.trim().toUpperCase()))
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  type?: string[];
+}
+
+export class GetAvailableFiltersDTO {
+  @IsObject()
+  filters!: GetAvailableFilters;
 }
