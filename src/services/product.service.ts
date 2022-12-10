@@ -96,32 +96,37 @@ export class ProductService {
   }
 
   private async getProductsCount(filters: Object) {
-    const countQuery = this.getStockCountQuery(filters);
-    const { total, withStock } = await this.getProductsAdditionalInfo(countQuery);
+    const countQuery = this.getStockCountQuery();
+    const query = this.getGroupAggregation(filters, { ...countQuery });
+
+    const { total, withStock } = await this.getProductsAdditionalInfo(query);
 
     return { total, withStock };
   }
 
-  private getStockCountQuery(filters: Object) {
+  private getStockCountQuery() {
     const withStock = {
       withStock: { $sum: { $cond: { if: { $gt: ['$stock', 0] }, then: 1, else: 0 } } }
     };
     const total = { total: { $count: {} } };
 
-    const countFilters = { ...withStock, ...total };
-
-    return this.getGroupAggregation(filters, countFilters);
+    return { ...withStock, ...total };
   }
 
   async getAvailableFilters(receivedFilters: GetAvailableFilters) {
     const filters = this.getFilters(receivedFilters);
-    const availableFiltersQuery = this.getAvailableFiltersQuery(filters);
-    const availableFilters = await this.getProductsAdditionalInfo(availableFiltersQuery);
+
+    const setQuery = this.getSetQuery();
+    const priceQuery = this.getPriceQuery();
+
+    const query = this.getGroupAggregation(filters, { ...setQuery, ...priceQuery });
+
+    const availableFilters = await this.getProductsAdditionalInfo(query);
 
     return { filters: availableFilters };
   }
 
-  private getAvailableFiltersQuery(filters: GetAvailableFilters) {
+  private getSetQuery() {
     const filterKeys = Object.values(ProductFilters);
     const addToSetObject: any = {};
 
@@ -129,7 +134,14 @@ export class ProductService {
       addToSetObject[key] = { $addToSet: `$${key}` };
     });
 
-    return this.getGroupAggregation(filters, addToSetObject);
+    return addToSetObject;
+  }
+
+  private getPriceQuery() {
+    const maxPriceQuery = { maxPrice: { $max: '$price' } };
+    const minPriceQuery = { minPrice: { $min: '$price' } };
+
+    return { ...maxPriceQuery, ...minPriceQuery };
   }
 
   private getGroupAggregation(filters: Object, aggregationQuery: Object) {
@@ -153,7 +165,8 @@ export class ProductService {
     for (const filterKey in parsedInfo) {
       const values = parsedInfo[filterKey];
 
-      if (values.length > 0) {
+      // TODO
+      if (values.length > 1 || typeof values === 'number') {
         filtersObject[filterKey] = values;
       }
     }

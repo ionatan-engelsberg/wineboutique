@@ -12,6 +12,10 @@ export interface ProductsAdditionalInfoObject {
 
   withStock?: number;
 
+  maxPrice?: number;
+
+  minPrice?: number;
+
   brand?: string[];
 
   grape?: string[];
