@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { DEFAULT_PRODUCT_IMAGE_URL } from '../config/config';
 import { Product } from '../interfaces';
-import { getCurrentDate } from '../utils/getCurrentDate';
+import { ProductCategory } from '../types/Product.types';
 
 export const ProductSchema = new Schema<Product>(
   {
@@ -34,27 +34,23 @@ export const ProductSchema = new Schema<Product>(
       trim: true,
       uppercase: true
     },
-    year: {
-      type: Number,
-      min: 0,
-      max: getCurrentDate().getFullYear()
-    },
     type: {
       type: String,
       required: [true, 'Product type is required'],
       trim: true,
       uppercase: true
     },
-    region: {
+    category: {
       type: String,
+      enum: {
+        values: Object.values(ProductCategory),
+        message: `Product category must be one of the following: ${Object.values(ProductCategory)}`
+      },
+      required: [true, 'Product category is required'],
       trim: true,
       uppercase: true
     },
     featuredInHome: {
-      type: Boolean,
-      default: false
-    },
-    outlined: {
       type: Boolean,
       default: false
     },

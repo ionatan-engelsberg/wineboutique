@@ -17,10 +17,12 @@ import {
   ProductFilters,
   ProductFiltersType,
   ProductFiltersTypeEnum,
-  ProductPriceParsedKey
+  ProductPriceParsedKey,
+  ProductCategory
 } from '../types/Product.types';
 import { ObjectId } from '../types/ObjectId';
 import { UserJWT, UserRole } from '../types/User.types';
+import { Product } from '../interfaces';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
 const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined';
@@ -32,37 +34,39 @@ export class ProductService {
 
   // TODO: Temporal
   async createTestProducts() {
-    const brands = ['zuccardi', 'angelica zapata', 'bramare', 'amar y vivir'];
-    const grapes = ['malbec', 'pinot noir', 'cabernet sauvignon', 'cabernet franc', 'blend'];
+    const brands = ['zuccardi', 'angelica zapata', 'bramare', 'amar y vivir', 'rutini', 'chacra'];
+    const grapes = [
+      'malbec',
+      'pinot noir',
+      'cabernet sauvignon',
+      'cabernet franc',
+      'blend',
+      'syrah'
+    ];
     const types = ['tinto', 'blanco', 'rosado', 'champagne'];
-    const regions = ['mendoza', 'misiones', 'calafate'];
 
     let i = 0;
-    while (i < 50) {
+    while (i < 100) {
       const price = 10 * (i + 1);
       const name = uniqid();
       const description = uniqid();
-      const brand = brands[i % 4];
-      const grape = grapes[i % 5];
-      const year = i % 4 !== 0 ? 2020 - (i % 4) : undefined;
-      const type = types[i % 4];
-      const outlined = i % 10 === 0;
+      const category = i % 5 === 0 ? ProductCategory.OIL : ProductCategory.WINE;
+      const brand = brands[i % 6];
+      const grape = category === ProductCategory.OIL ? 'oil' : grapes[i % 6];
+      const type = category === ProductCategory.OIL ? 'oil' : types[i % 4];
       const featuredInHome = i % 10 === 0;
-      const region = i % 4 !== 0 ? regions[i - 1] : undefined;
       const stock = (i % 4) ** 2;
 
-      const product = {
+      const product: Product = {
         price,
         name,
         description,
         brand,
         grape,
-        year,
         type,
-        outlined,
         featuredInHome,
-        region,
-        stock
+        stock,
+        category
       };
 
       await this._productRepository.create(product);
@@ -203,6 +207,10 @@ export class ProductService {
         }
         case ProductFiltersTypeEnum.REGEX: {
           filters[key] = { $regex: `${value}` };
+          break;
+        }
+        case ProductFiltersTypeEnum.VALUE: {
+          filters[key] = value;
           break;
         }
         default:

@@ -4,18 +4,15 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
-  IsInt,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
-  Max,
   Min
 } from 'class-validator';
 
-import { GetProductsSort } from '../types/Product.types';
+import { GetProductsSort, ProductCategory } from '../types/Product.types';
 import { UserJWT } from '../types/User.types';
-import { getCurrentDate } from '../utils/getCurrentDate';
 
 export class GetProductsFilters {
   @IsNumber()
@@ -25,6 +22,10 @@ export class GetProductsFilters {
   @IsEnum(GetProductsSort)
   sort!: GetProductsSort;
 
+  @IsEnum(ProductCategory)
+  category!: ProductCategory;
+
+  // TODO: ValidateIf
   @IsOptional()
   @Transform((value) => value[0].split(',').map((val: string) => val.trim().toUpperCase()))
   @IsArray()
@@ -40,22 +41,6 @@ export class GetProductsFilters {
   brand?: string[];
 
   @IsOptional()
-  @Transform((value) => value[0].split(',').map((val: string) => val.trim().toUpperCase()))
-  @IsArray()
-  @ArrayUnique()
-  @IsString({ each: true })
-  region?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @ArrayUnique()
-  @Transform((value) => value[0].split(',').map((val: string) => Number(val)))
-  @IsInt({ each: true })
-  @Min(0, { each: true })
-  @Max(getCurrentDate().getFullYear(), { each: true })
-  year?: number[];
-
-  @IsOptional()
   @IsNumber()
   @Min(0)
   minPrice?: number;
@@ -64,6 +49,7 @@ export class GetProductsFilters {
   @IsNumber()
   maxPrice?: number;
 
+  // TODO: ValidateIf
   @IsOptional()
   @Transform((value) => value[0].split(',').map((val: string) => val.trim().toUpperCase()))
   @IsArray()
@@ -105,13 +91,8 @@ export class GetManyProductsByIdsDTO {
 }
 
 export class GetFeaturedProductsFilters {
-  @IsOptional()
   @IsBoolean()
-  featuredInHome?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  outlined?: boolean;
+  featuredInHome!: boolean;
 }
 
 export class GetFeaturedProductsDTO {
@@ -124,12 +105,8 @@ export class GetFeaturedProductsDTO {
 }
 
 export class GetAvailableFilters {
-  @IsOptional()
-  @Transform((value) => value[0].split(',').map((val: string) => val.trim().toUpperCase()))
-  @IsArray()
-  @ArrayUnique()
-  @IsString({ each: true })
-  type?: string[];
+  @IsEnum(ProductCategory)
+  category!: ProductCategory;
 }
 
 export class GetAvailableFiltersDTO {

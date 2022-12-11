@@ -1,9 +1,11 @@
+export enum ProductCategory {
+  WINE = 'WINE',
+  OIL = 'OIL'
+}
+
 export enum ProductFilters {
   BRAND = 'brand',
   GRAPE = 'grape',
-  // TODO: Delete
-  // YEAR = 'year',
-  // REGION = 'region',
   TYPE = 'type'
 }
 
@@ -19,10 +21,6 @@ export interface ProductsAdditionalInfoObject {
   brand?: string[];
 
   grape?: string[];
-
-  year?: string[];
-
-  region?: string[];
 
   type?: string[];
 }
@@ -45,18 +43,18 @@ export enum ProductFiltersTypeEnum {
   ARRAY,
   MAX_VALUE,
   MIN_VALUE,
-  REGEX
+  REGEX,
+  VALUE
 }
 
 export enum ProductFiltersType {
   brand = ProductFiltersTypeEnum.ARRAY,
   grape = ProductFiltersTypeEnum.ARRAY,
-  year = ProductFiltersTypeEnum.ARRAY,
-  region = ProductFiltersTypeEnum.ARRAY,
   type = ProductFiltersTypeEnum.ARRAY,
   maxPrice = ProductFiltersTypeEnum.MAX_VALUE,
   minPrice = ProductFiltersTypeEnum.MIN_VALUE,
-  name = ProductFiltersTypeEnum.REGEX
+  name = ProductFiltersTypeEnum.REGEX,
+  category = ProductFiltersTypeEnum.VALUE
 }
 
 export const ProductPriceParsedKey = {
