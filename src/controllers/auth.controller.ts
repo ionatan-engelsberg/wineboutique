@@ -44,9 +44,9 @@ export class AuthController {
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) dto: LoginDTO,
     @Res() res: any
   ) {
-    const { token, cookieOptions, name, userId } = await this._authAdapter.login(dto);
+    const { token, cookieOptions, name, userId, isAuthorized } = await this._authAdapter.login(dto);
     res.cookie('token', token, { ...cookieOptions });
-    return { name, userId };
+    return { name, userId, isAuthorized };
   }
 
   // TODO

@@ -184,10 +184,12 @@ export class UserService {
 
   getCurrentUser(userJWT?: UserJWT) {
     if (!userJWT) {
-      throw new UnauthorizedError('Private route');
+      return null;
     }
 
-    const { firstName, userId } = userJWT;
-    return { firstName, userId };
+    const { firstName, userId, role } = userJWT;
+    const isAuthorized = role !== UserRole.USER;
+
+    return { firstName, userId, isAuthorized };
   }
 }

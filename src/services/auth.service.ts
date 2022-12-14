@@ -16,6 +16,7 @@ import { UserRepository } from '../repositories/user.repository';
 
 import { User } from '../interfaces';
 import { getCurrentDate } from '../utils/getCurrentDate';
+import { UserRole } from '../types/User.types';
 
 const TOKEN_RANDOM_BYTES = 40;
 
@@ -67,7 +68,12 @@ export class AuthService {
 
     const cookies = await this._credentialsService.createUserCookies(user);
 
-    return { ...cookies, name: user.firstName, userId: user._id };
+    return {
+      ...cookies,
+      name: user.firstName,
+      userId: user._id,
+      isAuthorized: user.role !== UserRole.USER
+    };
   }
 
   private async validateLoginCredentials(email: string, password: string) {
