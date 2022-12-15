@@ -78,6 +78,7 @@ export class UserAdapter {
     return omit(createdUser, omitFields);
   }
 
+  // TODO
   async updateUser(dto: UpdateUserDTO) {
     const { firstName, lastName, email, birthdate, role, userId, userJWT } = dto;
 
@@ -110,12 +111,7 @@ export class UserAdapter {
 
   async deleteUser(dto: DeleteUserDTO) {
     const { userId, userJWT } = dto;
-
-    const userToDelete = await this._userService.findById(userId);
-    const user =
-      userJWT.userId === userId ? userToDelete : await this._userService.findById(userJWT.userId);
-
-    await this._userService.deleteUser(user, userToDelete);
+    await this._userService.deleteUser(userJWT, userId);
   }
 
   async updateUserPassword(dto: UpdateUserPasswordDTO) {
