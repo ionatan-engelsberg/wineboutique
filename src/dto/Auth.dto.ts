@@ -1,12 +1,4 @@
-import {
-  IsDate,
-  IsEmail,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-  MaxLength,
-  MinLength
-} from 'class-validator';
+import { IsEmail, IsNumber, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 import { Match } from '../utils/validators/passwordsAreEqual';
 import { ContainsLettersAndNumbers } from '../utils/validators/passwordRegex';
@@ -39,9 +31,8 @@ export class SignUpDTO {
   @Match('password')
   checkPassword!: string;
 
-  // TODO: Send a code error
   @IsOptional()
-  @IsPhoneNumber('AR')
+  @IsNumber()
   phoneNumber?: number;
 }
 

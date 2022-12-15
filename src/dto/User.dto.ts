@@ -1,12 +1,12 @@
 import {
   IsEmail,
   IsOptional,
-  IsPhoneNumber,
   IsString,
   MaxLength,
   MinLength,
   IsEnum,
-  IsObject
+  IsObject,
+  IsNumber
 } from 'class-validator';
 import { ValidNewUserWithRole } from '../utils/validators/createUserRole';
 import { ContainsLettersAndNumbers } from '../utils/validators/passwordRegex';
@@ -48,7 +48,7 @@ export class CreateUserWithRoleBody {
   birthdate!: Date;
 
   @IsOptional()
-  @IsPhoneNumber('AR')
+  @IsNumber()
   phoneNumber?: number;
 
   @IsEnum(UserRole)
@@ -82,7 +82,7 @@ export class UpdateUserBody {
   birthdate!: Date;
 
   @IsOptional()
-  @IsPhoneNumber('AR')
+  @IsNumber()
   phoneNumber?: number;
 
   @IsOptional()
