@@ -4,11 +4,13 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsInt,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
-  Min
+  Min,
+  ValidateIf
 } from 'class-validator';
 
 import { GetProductsSort, ProductCategory } from '../types/Product.types';
@@ -119,4 +121,49 @@ export class GetAvailableFilters {
 export class GetAvailableFiltersDTO {
   @IsObject()
   filters!: GetAvailableFilters;
+}
+
+export class CreateProductBody {
+  @IsEnum(ProductCategory)
+  category!: ProductCategory;
+
+  @IsString()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsNumber()
+  @Min(0)
+  price!: number;
+
+  @IsString()
+  brand!: string;
+
+  @ValidateIf((body) => body.category === ProductCategory.WINE)
+  @IsString()
+  grape!: string;
+
+  @ValidateIf((body) => body.category === ProductCategory.WINE)
+  @IsString()
+  type!: string;
+
+  @Transform((value) => Boolean(value)) // TODO: Delete if when sending it from frontend value is already a boolean value
+  @IsBoolean()
+  featuredInHome!: boolean;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsInt()
+  @Min(0)
+  stock!: number;
+}
+
+export class CreateProductDTO extends CreateProductBody {
+  @IsString()
+  image!: string;
+
+  @IsString()
+  imageId!: string;
 }

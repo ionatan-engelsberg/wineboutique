@@ -8,8 +8,10 @@ import {
   GetAvailableFiltersDTO,
   GetManyProductsByIdsDTO,
   GetProductByIdDTO,
-  GetProductsDTO
+  GetProductsDTO,
+  CreateProductDTO
 } from '../dto/Product.dto';
+import { Product } from '../interfaces';
 
 @Service({ transient: true })
 export class ProductAdapter {
@@ -57,5 +59,10 @@ export class ProductAdapter {
   async getFeaturedProducts(dto: GetFeaturedProductsDTO) {
     const { filters, userJWT } = dto;
     return this._productService.getFeaturedProducts(filters, userJWT);
+  }
+
+  async createProduct(dto: CreateProductDTO) {
+    const product: Product = { ...dto };
+    return this._productService.createProduct(product);
   }
 }

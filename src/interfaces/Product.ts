@@ -6,7 +6,7 @@ export interface Product {
 
   name: string;
 
-  description: string;
+  description?: string;
 
   price: number;
 
@@ -21,6 +21,8 @@ export interface Product {
   stock: number;
 
   image?: string;
+
+  imageId?: string;
 
   category: ProductCategory;
 }

@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import uniqid from 'uniqid';
 import { omit } from 'lodash';
 
-import { IncorrectFormatError, NotFoundError } from '../errors/base.error';
+import { ConflictError, IncorrectFormatError, NotFoundError } from '../errors/base.error';
 
 import { SpecialService } from './special.service';
 
@@ -315,7 +315,6 @@ export class ProductService {
 
     const wines: Product[] = [];
     const oils: Product[] = [];
-    const opportunityBoxes: Special[] = [];
 
     products.forEach((prod) => {
       // TODO: Add destilado condition when adding that category
@@ -342,5 +341,43 @@ export class ProductService {
     const parsedFilters = { ...filters, stock: { $gt: 0 } };
 
     return this._productRepository.findMany(parsedFilters, options);
+  }
+
+  async createProduct(product: Product) {
+    await this.validateExistingProduct(product);
+
+    product = this.getParsedProduct(product);
+
+    return this._productRepository.create(product);
+  }
+
+  private getParsedProduct(product: Product) {
+    // TODO: Make it more generic
+    if (product.category === ProductCategory.OIL) {
+      // TODO: Define 'OIL' as a constant
+      product.grape = 'OIL';
+      product.type = 'OIL';
+    }
+
+    return product;
+  }
+
+  private async validateExistingProduct(product: Product) {
+    let existingProduct: Product;
+
+    try {
+      const { name } = product;
+      existingProduct = await this._productRepository.findOne({ name });
+
+      if (existingProduct) {
+        throw new ConflictError(`Product with name ${name} already exists`, [
+          { productId: existingProduct._id }
+        ]);
+      }
+    } catch (error: any) {
+      if (error.details) {
+        throw error;
+      }
+    }
   }
 }

@@ -9,7 +9,8 @@ export const ProductSchema = new Schema<Product>(
       type: String,
       required: [true, 'Product name is required'],
       trim: true,
-      uppercase: true
+      uppercase: true,
+      unique: true
     },
     description: {
       type: String,
@@ -62,6 +63,9 @@ export const ProductSchema = new Schema<Product>(
     image: {
       type: String,
       default: DEFAULT_PRODUCT_IMAGE_URL
+    },
+    imageId: {
+      type: String
     }
   },
   { versionKey: false }
