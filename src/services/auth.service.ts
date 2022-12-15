@@ -3,7 +3,6 @@ import { randomBytes } from 'crypto';
 
 import {
   ConflictError,
-  ForbiddenError,
   IncorrectFormatError,
   NotFoundError,
   UnauthorizedError
