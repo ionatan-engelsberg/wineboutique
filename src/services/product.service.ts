@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import uniqid from 'uniqid';
-import { omit } from 'lodash';
+import { omit, isEqual } from 'lodash';
 
 import { ConflictError, IncorrectFormatError, NotFoundError } from '../errors/base.error';
 
@@ -27,7 +27,6 @@ import { ObjectId } from '../types/ObjectId';
 import { UserJWT, UserRole } from '../types/User.types';
 import { Product, Special } from '../interfaces';
 import { SpecialCategory } from '../types/Special.types';
-import { logErrors } from '../utils/logger';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
 const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined';
@@ -82,6 +81,10 @@ export class ProductService {
       await this._productRepository.create(product);
       i += 1;
     }
+  }
+
+  async findById(productId: ObjectId) {
+    return this._productRepository.findById(productId);
   }
 
   async getProducts(receivedFilters: GetProductsFilters, user?: UserJWT) {
@@ -392,10 +395,42 @@ export class ProductService {
     await this._productRepository.deleteById(productId);
 
     if (imageId) {
-      try {
-        await this._cloudinaryService.deleteImage(imageId);
-      } catch (error) {
-        logErrors(error);
+      await this._cloudinaryService.deleteImage(imageId);
+    }
+  }
+
+  async updateProduct(oldProduct: Product, newProduct: Product) {
+    await this.validateProductWithSameName(newProduct);
+
+    const { imageId: newProductImageId } = newProduct;
+
+    const { image, imageId } = oldProduct;
+    if (!newProductImageId) {
+      newProduct = { ...newProduct, image, imageId };
+    } else {
+      await this._cloudinaryService.deleteImage(imageId!);
+    }
+
+    if (!isEqual(newProduct, oldProduct)) {
+      await this._productRepository.update(newProduct);
+    }
+  }
+
+  private async validateProductWithSameName(product: Product) {
+    let existingProduct: Product;
+
+    try {
+      const { name } = product;
+      existingProduct = await this._productRepository.findOne({ name });
+
+      if (existingProduct && existingProduct._id !== product._id) {
+        throw new ConflictError(`Product with name ${name} already exists`, [
+          { productId: existingProduct._id }
+        ]);
+      }
+    } catch (error: any) {
+      if (error.details) {
+        throw error;
       }
     }
   }

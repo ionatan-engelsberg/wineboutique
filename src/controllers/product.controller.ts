@@ -9,6 +9,7 @@ import {
   OnUndefined,
   Param,
   Post,
+  Put,
   QueryParams,
   Req,
   UploadedFile,
@@ -32,7 +33,9 @@ import {
   GetProductsFilters,
   CreateProductBody,
   CreateProductDTO,
-  DeleteProductDTO
+  DeleteProductDTO,
+  UpdateProductBody,
+  UpdateProductDTO
 } from '../dto/Product.dto';
 import { CloudinaryFolder } from '../types/Cloudinary.types';
 
@@ -147,5 +150,45 @@ export class ProductController {
   async deleteProduct(@CurrentUser() userJWT: UserJWT, @Param('productId') productId: string) {
     const dto: DeleteProductDTO = { productId };
     await this._productAdapter.deleteProduct(dto);
+  }
+
+  @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
+  @Put('/:productId')
+  @OnUndefined(HttpStatusCode.NO_CONTENT)
+  async updateProduct(
+    @CurrentUser() userJWT: UserJWT,
+    @Param('productId') productId: string,
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: UpdateProductBody,
+    @UploadedFile('image', { required: false, options: multerOptions }) file: MulterFile
+  ) {
+    if (!file) {
+      const dto: UpdateProductDTO = { productId, ...body };
+      return this._productAdapter.updateProduct(dto);
+    }
+
+    let image: string;
+    let imageId: string | null = null;
+
+    try {
+      const cloudinaryDTO: UploadImageDTO = {
+        filename: file.filename,
+        folder: CloudinaryFolder.PRODUCT
+      };
+      const upload = await this._cloudinaryAdapter.uploadImage(cloudinaryDTO);
+
+      image = upload.url;
+      imageId = upload.imageId;
+
+      const dto: UpdateProductDTO = { productId, ...body, image, imageId };
+      await this._productAdapter.updateProduct(dto);
+    } catch (error) {
+      emptyUploadsDirectory();
+      if (imageId) {
+        const deleteImageDTO: DeleteImageDTO = { imageId };
+        await this._cloudinaryAdapter.deleteImage(deleteImageDTO);
+      }
+
+      throw error;
+    }
   }
 }

@@ -10,7 +10,8 @@ import {
   GetProductByIdDTO,
   GetProductsDTO,
   CreateProductDTO,
-  DeleteProductDTO
+  DeleteProductDTO,
+  UpdateProductDTO
 } from '../dto/Product.dto';
 import { Product } from '../interfaces';
 
@@ -70,5 +71,29 @@ export class ProductAdapter {
   async deleteProduct(dto: DeleteProductDTO) {
     const { productId } = dto;
     return this._productService.deleteProduct(productId);
+  }
+
+  async updateProduct(dto: UpdateProductDTO) {
+    const { productId, name, description, price, featuredInHome, stock, image, imageId } = dto;
+
+    const oldProduct = await this._productService.findById(productId);
+    const { category, brand, grape, type } = oldProduct;
+
+    const updatedProduct = {
+      _id: oldProduct._id,
+      name,
+      description,
+      price,
+      featuredInHome,
+      stock,
+      image,
+      imageId,
+      category,
+      brand,
+      grape,
+      type
+    };
+
+    return this._productService.updateProduct(oldProduct, updatedProduct);
   }
 }

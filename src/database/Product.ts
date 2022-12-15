@@ -65,7 +65,8 @@ export const ProductSchema = new Schema<Product>(
       default: DEFAULT_PRODUCT_IMAGE_URL
     },
     imageId: {
-      type: String
+      type: String,
+      default: null
     }
   },
   { versionKey: false }

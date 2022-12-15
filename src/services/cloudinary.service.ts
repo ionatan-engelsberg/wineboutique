@@ -3,6 +3,7 @@ import { v2 as cloudinary } from 'cloudinary';
 
 import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_NAME } from '../config/config';
 import { CloudinaryFolder } from '../types/Cloudinary.types';
+import { logErrors } from '../utils/logger';
 
 cloudinary.config({
   cloud_name: CLOUDINARY_NAME,
@@ -26,6 +27,10 @@ export class CloudinaryService {
   }
 
   async deleteImage(imageId: string) {
-    await cloudinary.uploader.destroy(imageId);
+    try {
+      await cloudinary.uploader.destroy(imageId);
+    } catch (error) {
+      logErrors(error);
+    }
   }
 }

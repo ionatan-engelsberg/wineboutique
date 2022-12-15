@@ -172,3 +172,39 @@ export class DeleteProductDTO {
   @IsString()
   productId!: string;
 }
+
+export class UpdateProductBody {
+  @IsString()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsNumber()
+  @Min(0)
+  price!: number;
+
+  @Transform((value) => Boolean(value)) // TODO: Delete if when sending it from frontend value is already a boolean value
+  @IsBoolean()
+  featuredInHome!: boolean;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsInt()
+  @Min(0)
+  stock!: number;
+}
+
+export class UpdateProductDTO extends UpdateProductBody {
+  @IsString()
+  productId!: string;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @IsOptional()
+  @IsString()
+  imageId?: string;
+}
