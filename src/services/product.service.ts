@@ -6,6 +6,7 @@ import { ConflictError, IncorrectFormatError, NotFoundError } from '../errors/ba
 
 import { SpecialService } from './special.service';
 import { CloudinaryService } from './cloudinary.service';
+import { ExcelService } from './excel.service';
 
 import { ProductRepository } from '../repositories/product.repository';
 
@@ -21,7 +22,9 @@ import {
   ProductFiltersType,
   ProductFiltersTypeEnum,
   ProductPriceParsedKey,
-  ProductCategory
+  ProductCategory,
+  ParsedExcelProduct,
+  ImportedExcelProblems
 } from '../types/Product.types';
 import { ObjectId } from '../types/ObjectId';
 import { UserJWT, UserRole } from '../types/User.types';
@@ -39,6 +42,7 @@ export class ProductService {
   constructor(
     private readonly _specialService: SpecialService,
     private readonly _cloudinaryService: CloudinaryService,
+    private readonly _excelService: ExcelService,
 
     private readonly _productRepository: ProductRepository
   ) {}
@@ -446,5 +450,71 @@ export class ProductService {
         throw error;
       }
     }
+  }
+
+  async updateProductsMassively(filename: string) {
+    const excelProducts = this._excelService.importProductsExcel(filename);
+
+    let problems: ImportedExcelProblems = { name: [], brand: [], grape: [], image: [], type: [] };
+    const products: Product[] = [];
+
+    const images: string[] = [];
+
+    let i = 0;
+
+    return { problems, products };
+  }
+
+  private getImportedExcelProblem(problems: ImportedExcelProblems, product: ParsedExcelProduct) {
+    const { name, brand, grape, type, image } = product;
+
+    if (!name) {
+      problems.name.push(product);
+    }
+
+    if (!brand) {
+      problems.brand.push(product);
+    }
+
+    if (!grape) {
+      problems.grape.push(product);
+    }
+
+    if (!type) {
+      problems.type.push(product);
+    }
+
+    if (!image) {
+      problems.image.push(product);
+    }
+
+    return problems;
+  }
+
+  private getProductToCreate(product: ParsedExcelProduct, i: number) {
+    const { name, image } = product;
+
+    const price = 10 * i;
+    const stock = i;
+    const featuredInHome = i % 15 === 0;
+
+    const type = this.getFormattedType(product.type);
+    const brand = product.brand.toUpperCase().trim();
+    const grape = product.grape?.toUpperCase().trim();
+
+    return { name, type, brand, grape, price, stock, featuredInHome, image } as Product;
+  }
+
+  private getFormattedType(type: string) {
+    type = type.trim().toUpperCase();
+
+    if (type.startsWith('VINO ')) {
+      return type.replace('VINO ', '');
+    }
+    if (type.startsWith('ACEITE')) {
+      return 'ACEITE';
+    }
+
+    return type;
   }
 }

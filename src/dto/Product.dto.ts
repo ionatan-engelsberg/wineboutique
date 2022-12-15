@@ -208,3 +208,8 @@ export class UpdateProductDTO extends UpdateProductBody {
   @IsString()
   imageId?: string;
 }
+
+export class UpdateProductsMassivelyDTO {
+  @IsString()
+  filename!: string;
+}

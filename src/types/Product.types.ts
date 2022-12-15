@@ -62,3 +62,39 @@ export const ProductPriceParsedKey = {
   maxPrice: 'price',
   minPrice: 'price'
 };
+
+export interface ExcelProduct {
+  Nombre: string;
+
+  Tipo: string;
+
+  Bodega?: string;
+
+  Cepa?: string;
+
+  'Link foto'?: string;
+}
+
+export interface ParsedExcelProduct {
+  name: string;
+
+  type: string;
+
+  brand: string;
+
+  grape?: string;
+
+  image?: string;
+}
+
+export interface ImportedExcelProblems {
+  name: ParsedExcelProduct[];
+
+  brand: ParsedExcelProduct[];
+
+  grape: ParsedExcelProduct[];
+
+  image: ParsedExcelProduct[];
+
+  type: ParsedExcelProduct[];
+}

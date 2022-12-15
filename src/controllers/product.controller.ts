@@ -35,7 +35,8 @@ import {
   CreateProductDTO,
   DeleteProductDTO,
   UpdateProductBody,
-  UpdateProductDTO
+  UpdateProductDTO,
+  UpdateProductsMassivelyDTO
 } from '../dto/Product.dto';
 import { CloudinaryFolder } from '../types/Cloudinary.types';
 
@@ -188,6 +189,23 @@ export class ProductController {
         await this._cloudinaryAdapter.deleteImage(deleteImageDTO);
       }
 
+      throw error;
+    }
+  }
+
+  @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
+  @Post('/excel')
+  @UseAfter(emptyUploadsDirectory)
+  async excel(
+    @CurrentUser() userJWT: UserJWT,
+    @UploadedFile('excel', { options: multerOptions, required: true }) file: MulterFile
+  ) {
+    const { filename } = file;
+    try {
+      const dto: UpdateProductsMassivelyDTO = { filename };
+      return this._productAdapter.updateProductsMassively(dto);
+    } catch (error) {
+      emptyUploadsDirectory();
       throw error;
     }
   }

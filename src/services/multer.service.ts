@@ -12,7 +12,7 @@ export class MulterService {
 
   private static storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, path.join(__dirname, '..', '..', 'uploads'));
+      cb(null, `${__dirname}/../../uploads`);
     },
     filename: (req, file, cb) => {
       const filename = file.originalname.split(' ').join('_');

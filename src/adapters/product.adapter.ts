@@ -11,7 +11,8 @@ import {
   GetProductsDTO,
   CreateProductDTO,
   DeleteProductDTO,
-  UpdateProductDTO
+  UpdateProductDTO,
+  UpdateProductsMassivelyDTO
 } from '../dto/Product.dto';
 import { Product } from '../interfaces';
 
@@ -95,5 +96,10 @@ export class ProductAdapter {
     };
 
     return this._productService.updateProduct(oldProduct, updatedProduct);
+  }
+
+  async updateProductsMassively(dto: UpdateProductsMassivelyDTO) {
+    const { filename } = dto;
+    return this._productService.updateProductsMassively(filename);
   }
 }

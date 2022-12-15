@@ -12,6 +12,8 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
   error(error: any, _req: Request, res: Response, _next: NextFunction) {
     const { errors } = error;
 
+    console.log('ERROR: ', error);
+
     const status = error.status ?? error.httpCode ?? HttpStatusCode.INTERNAL_SERVER;
     let message = error.message ?? ErrorMessages.INTERNAL_SERVER;
     let { description } = error;
