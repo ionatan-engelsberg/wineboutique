@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
 import uniqid from 'uniqid';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 
 import {
   BadRequestError,
@@ -46,18 +46,24 @@ export class UserService {
     return this._userRepository.findMany(filters, options);
   }
 
-  getUserById(user: User, userToGet: User) {
-    if (user._id !== userToGet._id) {
-      this.validateGetOtherUser(user, userToGet);
+  async getUserById(userJWT: UserJWT, userId: ObjectId) {
+    if (userJWT.userId !== userId && userJWT.role === UserRole.USER) {
+      throw new UnauthorizedError('Unauthorized');
     }
 
-    return userToGet;
-  }
+    const requestingUser = await this._userRepository.findById(userJWT.userId);
 
-  private validateGetOtherUser(user: User, userToGet: User) {
-    if (user.role >= userToGet.role || userToGet.role === UserRole.USER) {
-      throw new NotFoundError(`User with id ${userToGet._id} does not exist`);
+    if (userJWT.userId === userId) {
+      const omitFields = requestingUser.role === UserRole.USER ? ['role'] : [];
+      return omit(requestingUser, omitFields);
     }
+
+    const user = await this._userRepository.findById(userId);
+    if (requestingUser.role >= user.role || user.role === UserRole.USER) {
+      throw new NotFoundError(`User with id ${user._id} does not exist`);
+    }
+
+    return user;
   }
 
   async createUser(authUser: User, newUser: User) {

@@ -38,19 +38,14 @@ export class UserAdapter {
   async getUserById(dto: GetUserByIdDTO) {
     const { userId, userJWT } = dto;
 
-    const userToGet = await this._userService.findById(userId);
-    const userAction =
-      userJWT.userId === userId ? userToGet : await this._userService.findById(userJWT.userId);
-
-    const user = this._userService.getUserById(userAction, userToGet);
+    const user = await this._userService.getUserById(userJWT, userId);
 
     const omitFields = [
       'password',
       'resetPasswordToken',
       'resetPasswordTokenExpirationDate',
       'createdAt',
-      'updatedAt',
-      'role' // TODO: Depending on the role of the user making the request (service)
+      'updatedAt'
     ];
     return omit(user, omitFields);
   }
