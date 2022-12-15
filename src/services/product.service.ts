@@ -31,6 +31,8 @@ import { SpecialCategory } from '../types/Special.types';
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
 const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined';
 const ROLE_USER_SELECT_FIELDS = '';
+const OIL_TYPE = 'OIL';
+const DISTILLED_TYPE = 'DISTILLED';
 
 @Service({ transient: true })
 export class ProductService {
@@ -317,17 +319,25 @@ export class ProductService {
   }
 
   private getParsedProductsObject(products: Product[], specials: Special[]) {
-    const productObject: { wines: Product[]; oils: Product[] } = { wines: [], oils: [] };
+    const productObject: { wines: Product[]; oils: Product[]; distilled: Product[] } = {
+      wines: [],
+      oils: [],
+      distilled: []
+    };
 
     const wines: Product[] = [];
     const oils: Product[] = [];
+    const distilleds: Product[] = [];
 
     products.forEach((prod) => {
-      // TODO: Add destilado condition when adding that category
       if (prod.category === ProductCategory.WINE) {
         wines.push(prod);
-      } else {
+      }
+      if (prod.category === ProductCategory.OIL) {
         oils.push(prod);
+      }
+      if (prod.category === ProductCategory.DISTILLED) {
+        distilleds.push(prod);
       }
     });
 
@@ -335,6 +345,7 @@ export class ProductService {
 
     productObject.wines = wines;
     productObject.oils = oils;
+    productObject.distilled = distilleds;
 
     return { ...productObject, ...specialsObject };
   }
@@ -358,11 +369,13 @@ export class ProductService {
   }
 
   private getParsedProduct(product: Product) {
-    // TODO: Make it more generic
     if (product.category === ProductCategory.OIL) {
-      // TODO: Define 'OIL' as a constant
-      product.grape = 'OIL';
-      product.type = 'OIL';
+      product.grape = OIL_TYPE;
+      product.type = OIL_TYPE;
+    }
+    if (product.category === ProductCategory.DISTILLED) {
+      product.grape = DISTILLED_TYPE;
+      product.type = DISTILLED_TYPE;
     }
 
     return product;

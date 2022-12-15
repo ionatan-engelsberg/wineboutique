@@ -1,6 +1,7 @@
 export enum ProductCategory {
   WINE = 'WINE',
-  OIL = 'OIL'
+  OIL = 'OIL',
+  DISTILLED = 'DISTILLED'
 }
 
 export enum ProductFilters {
