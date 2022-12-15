@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 import { Special } from '../interfaces';
 
 import { SpecialRepository } from '../repositories/special.repository';
+import { ObjectId } from '../types/ObjectId';
 
 import { SpecialCategory } from '../types/Special.types';
 import { getCurrentDate } from '../utils/getCurrentDate';
@@ -198,6 +199,11 @@ export class SpecialService {
   }
 
   async getAllSpecialsOfACategory(category: SpecialCategory) {
-    return this._specialRepository.findMany({ category });
+    return this._specialRepository.findMany({ category, stock: { $gt: 0 } });
+  }
+
+  async getManySpecialsOfACategoryByIds(category: SpecialCategory, specialIds: ObjectId[]) {
+    const filterQuery = { _id: { $in: specialIds }, category };
+    return this._specialRepository.findMany(filterQuery);
   }
 }

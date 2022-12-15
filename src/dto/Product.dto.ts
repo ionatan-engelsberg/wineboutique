@@ -88,6 +88,13 @@ export class GetManyProductsByIdsDTO {
   @ArrayUnique()
   @IsString({ each: true })
   productIds!: string[];
+
+  @IsOptional()
+  @Transform((value) => value[0].split(',').map((val: string) => val.trim()))
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  specialIds!: string[];
 }
 
 export class GetFeaturedProductsFilters {

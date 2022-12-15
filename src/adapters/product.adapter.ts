@@ -35,12 +35,23 @@ export class ProductAdapter {
   }
 
   async getManyProductsByIds(dto: GetManyProductsByIdsDTO) {
-    const { productIds } = dto;
+    const { productIds, specialIds } = dto;
 
-    const products = await this._productService.getManyProductsByIds(productIds);
+    const products = await this._productService.getManyProductsByIds(productIds, specialIds);
 
     const omitFields = ['description', 'featuredInHome', 'outlined'];
-    return products.map((prod) => omit(prod, omitFields));
+    const parsedObject: { wines: []; oils: []; opportunityBoxes: [] } = {
+      wines: [],
+      oils: [],
+      opportunityBoxes: []
+    };
+
+    for (const key in products) {
+      const parsedProducts = products[key].map((prod) => omit(prod, omitFields));
+      parsedObject[key] = parsedProducts;
+    }
+
+    return parsedObject;
   }
 
   async getFeaturedProducts(dto: GetFeaturedProductsDTO) {

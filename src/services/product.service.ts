@@ -4,6 +4,8 @@ import { omit } from 'lodash';
 
 import { IncorrectFormatError, NotFoundError } from '../errors/base.error';
 
+import { SpecialService } from './special.service';
+
 import { ProductRepository } from '../repositories/product.repository';
 
 import {
@@ -22,7 +24,8 @@ import {
 } from '../types/Product.types';
 import { ObjectId } from '../types/ObjectId';
 import { UserJWT, UserRole } from '../types/User.types';
-import { Product } from '../interfaces';
+import { Product, Special } from '../interfaces';
+import { SpecialCategory } from '../types/Special.types';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
 const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined';
@@ -30,7 +33,11 @@ const ROLE_USER_SELECT_FIELDS = '';
 
 @Service({ transient: true })
 export class ProductService {
-  constructor(private readonly _productRepository: ProductRepository) {}
+  constructor(
+    private readonly _specialService: SpecialService,
+
+    private readonly _productRepository: ProductRepository
+  ) {}
 
   // TODO: Temporal
   async createTestProducts() {
@@ -290,10 +297,41 @@ export class ProductService {
     return this._productRepository.findById(productId, selectFields);
   }
 
-  async getManyProductsByIds(productIds: ObjectId[]) {
+  async getManyProductsByIds(productIds: ObjectId[], specialIds: ObjectId[]) {
     const filterQuery = { _id: { $in: productIds } };
+    const products = await this._productRepository.findMany(filterQuery);
+    const specials = await this._specialService.getManySpecialsOfACategoryByIds(
+      SpecialCategory.OPPORTUNITY_BOX,
+      specialIds
+    );
 
-    return this._productRepository.findMany(filterQuery);
+    const productObject = this.getParsedProductsObject(products, specials);
+
+    return productObject;
+  }
+
+  private getParsedProductsObject(products: Product[], specials: Special[]) {
+    const productObject: { wines: Product[]; oils: Product[] } = { wines: [], oils: [] };
+
+    const wines: Product[] = [];
+    const oils: Product[] = [];
+    const opportunityBoxes: Special[] = [];
+
+    products.forEach((prod) => {
+      // TODO: Add destilado condition when adding that category
+      if (prod.category === ProductCategory.WINE) {
+        wines.push(prod);
+      } else {
+        oils.push(prod);
+      }
+    });
+
+    const specialsObject = { opportunityBoxes: specials };
+
+    productObject.wines = wines;
+    productObject.oils = oils;
+
+    return { ...productObject, ...specialsObject };
   }
 
   async getFeaturedProducts(filters: GetFeaturedProductsFilters, user?: UserJWT) {
