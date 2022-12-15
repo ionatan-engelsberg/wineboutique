@@ -87,8 +87,8 @@ export class UpdateUserBody {
 
   @IsOptional()
   @IsEnum(UserRole)
-  // @ValidNewUserWithRole('role')
-  role!: UserRole;
+  // @ValidNewUserWithRole('role') // TODO
+  role?: UserRole;
 }
 
 export class UpdateUserDTO extends UpdateUserBody {

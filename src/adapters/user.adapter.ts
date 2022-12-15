@@ -78,26 +78,24 @@ export class UserAdapter {
     return omit(createdUser, omitFields);
   }
 
-  // TODO
   async updateUser(dto: UpdateUserDTO) {
-    const { firstName, lastName, email, birthdate, role, userId, userJWT } = dto;
+    const { firstName, lastName, email, birthdate, phoneNumber, role, userId, userJWT } = dto;
 
     const oldUser = await this._userService.findById(userId);
-    const user =
-      userJWT.userId === userId ? oldUser : await this._userService.findById(userJWT.userId);
+
     const newUser = {
       _id: oldUser._id,
       firstName,
       lastName,
       email,
       birthdate: new Date(Date.now()), // TODO
-      role: role ?? oldUser.role /* TODO */,
-      userId,
+      phoneNumber,
+      role: role ?? oldUser.role,
       password: oldUser.password,
-      isActive: oldUser.isActive
+      isActive: true
     } as User;
 
-    const updatedUser = await this._userService.updateUser(user, oldUser, newUser);
+    const updatedUser = await this._userService.updateUser(userJWT, oldUser, newUser);
 
     const omitFields = [
       'password',

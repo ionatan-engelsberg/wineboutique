@@ -3,9 +3,9 @@ import uniqid from 'uniqid';
 import { isEqual, omit } from 'lodash';
 
 import {
-  BadRequestError,
   ConflictError,
   ForbiddenError,
+  IncorrectFormatError,
   NotFoundError,
   UnauthorizedError
 } from '../errors/base.error';
@@ -79,40 +79,47 @@ export class UserService {
     return this._authService.signup(newUser);
   }
 
-  async updateUser(user: User, userToUpdate: User, newUser: User) {
-    if (user._id !== userToUpdate._id) {
-      this.validateUpdateOtherUserWithRole(user, userToUpdate, newUser);
+  async updateUser(userJWT: UserJWT, oldUser: User, newUser: User) {
+    if (!oldUser.isActive) {
+      throw new NotFoundError(`User with id ${oldUser._id} does not exist`);
+    }
+
+    if (userJWT.userId !== oldUser._id) {
+      this.validateUpdateOtherUserWithRole(userJWT, oldUser, newUser);
     } else {
-      this.validateUpdateUser(userToUpdate, newUser);
+      this.validateUpdateUser(oldUser, newUser);
     }
-    await this.validateUserWithSameEmail(userToUpdate, newUser);
+    await this.validateUserWithSameEmail(oldUser, newUser);
 
-    if (isEqual(userToUpdate, newUser)) {
-      return userToUpdate;
+    const omitFields = userJWT.role === UserRole.USER ? ['role'] : [];
+
+    if (isEqual(oldUser, newUser)) {
+      return omit(oldUser, omitFields);
     }
 
-    return this._userRepository.update(newUser);
+    const updatedUser = await this._userRepository.update(newUser);
+    return omit(updatedUser, omitFields);
   }
 
-  private validateUpdateOtherUserWithRole(user: User, userToUpdate: User, newUser: User) {
-    if (user.role >= userToUpdate.role) {
-      throw new NotFoundError(`User with id ${userToUpdate._id} does not exist`);
+  private validateUpdateOtherUserWithRole(userJWT: UserJWT, oldUser: User, newUser: User) {
+    if (userJWT.role >= oldUser.role) {
+      throw new NotFoundError(`User with id ${oldUser._id} does not exist`);
     }
-    if (userToUpdate.role === UserRole.USER) {
+    if (oldUser.role === UserRole.USER) {
       throw new ForbiddenError('Cannot update the requested user');
     }
-    if (newUser.role <= user.role) {
-      throw new BadRequestError('Can not assign to a user a role equal or higher than its own');
+    if (newUser.role <= userJWT.role) {
+      throw new ForbiddenError('Can not assign to a user a role equal or higher than its own');
     }
   }
 
   private validateUpdateUser(oldUser: User, newUser: User) {
     if (oldUser.role !== newUser.role) {
-      throw new ForbiddenError('User can not update its own role');
-    }
+      if (oldUser.role === UserRole.USER) {
+        throw new IncorrectFormatError('Incorrect parameter "role"');
+      }
 
-    if (!oldUser.isActive) {
-      throw new NotFoundError(`User with id ${oldUser._id} does not exist`);
+      throw new ForbiddenError('User can not update its own role');
     }
   }
 
@@ -127,7 +134,7 @@ export class UserService {
         throw new ConflictError(`User with email ${email} already exists`, [{ userId }]);
       }
 
-      await this.updateExistingUserEmail(existingUser);
+      await this.updateUnactiveExistingUserEmail(existingUser);
     } catch (error: any) {
       if (error.details && error.details[0].userId !== oldUser._id) {
         throw error;
@@ -135,29 +142,12 @@ export class UserService {
     }
   }
 
-  private async updateExistingUserEmail(user: User) {
+  private async updateUnactiveExistingUserEmail(user: User) {
     const uniqId = uniqid();
     const ficticiuosEmail = `${uniqId}@gmail.com`;
     user.email = ficticiuosEmail;
     await this._userRepository.update(user);
   }
-
-  // async deleteUser(user: User, userToDelete: User) {
-  //   if (user._id !== userToDelete._id) {
-  //     return this.deleteOtherUser(user, userToDelete);
-  //   }
-
-  //   if (!userToDelete.isActive) {
-  //     throw new NotFoundError(`User with id ${userToDelete._id} does not exist`);
-  //   }
-
-  //   if (userToDelete.role !== UserRole.USER) {
-  //     throw new ForbiddenError('This user can not delete its own account');
-  //   }
-
-  //   userToDelete.isActive = false;
-  //   await this._userRepository.update(userToDelete);
-  // }
 
   async deleteUser(userJWT: UserJWT, userId: ObjectId) {
     const user = await this._userRepository.findById(userId);
