@@ -5,6 +5,7 @@ import { omit } from 'lodash';
 import { ConflictError, IncorrectFormatError, NotFoundError } from '../errors/base.error';
 
 import { SpecialService } from './special.service';
+import { CloudinaryService } from './cloudinary.service';
 
 import { ProductRepository } from '../repositories/product.repository';
 
@@ -26,6 +27,7 @@ import { ObjectId } from '../types/ObjectId';
 import { UserJWT, UserRole } from '../types/User.types';
 import { Product, Special } from '../interfaces';
 import { SpecialCategory } from '../types/Special.types';
+import { logErrors } from '../utils/logger';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
 const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined';
@@ -35,6 +37,7 @@ const ROLE_USER_SELECT_FIELDS = '';
 export class ProductService {
   constructor(
     private readonly _specialService: SpecialService,
+    private readonly _cloudinaryService: CloudinaryService,
 
     private readonly _productRepository: ProductRepository
   ) {}
@@ -377,6 +380,22 @@ export class ProductService {
     } catch (error: any) {
       if (error.details) {
         throw error;
+      }
+    }
+  }
+
+  async deleteProduct(productId: ObjectId) {
+    const product = await this._productRepository.findById(productId);
+
+    const { imageId } = product;
+
+    await this._productRepository.deleteById(productId);
+
+    if (imageId) {
+      try {
+        await this._cloudinaryService.deleteImage(imageId);
+      } catch (error) {
+        logErrors(error);
       }
     }
   }

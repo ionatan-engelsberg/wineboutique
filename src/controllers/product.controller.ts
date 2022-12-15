@@ -3,6 +3,7 @@ import {
   Authorized,
   Body,
   CurrentUser,
+  Delete,
   Get,
   JsonController,
   OnUndefined,
@@ -30,7 +31,8 @@ import {
   GetProductsDTO,
   GetProductsFilters,
   CreateProductBody,
-  CreateProductDTO
+  CreateProductDTO,
+  DeleteProductDTO
 } from '../dto/Product.dto';
 import { CloudinaryFolder } from '../types/Cloudinary.types';
 
@@ -137,5 +139,13 @@ export class ProductController {
 
       throw error;
     }
+  }
+
+  @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
+  @Delete('/:productId')
+  @OnUndefined(HttpStatusCode.OK)
+  async deleteProduct(@CurrentUser() userJWT: UserJWT, @Param('productId') productId: string) {
+    const dto: DeleteProductDTO = { productId };
+    await this._productAdapter.deleteProduct(dto);
   }
 }

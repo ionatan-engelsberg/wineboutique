@@ -9,7 +9,8 @@ import {
   GetManyProductsByIdsDTO,
   GetProductByIdDTO,
   GetProductsDTO,
-  CreateProductDTO
+  CreateProductDTO,
+  DeleteProductDTO
 } from '../dto/Product.dto';
 import { Product } from '../interfaces';
 
@@ -64,5 +65,10 @@ export class ProductAdapter {
   async createProduct(dto: CreateProductDTO) {
     const product: Product = { ...dto };
     return this._productService.createProduct(product);
+  }
+
+  async deleteProduct(dto: DeleteProductDTO) {
+    const { productId } = dto;
+    return this._productService.deleteProduct(productId);
   }
 }

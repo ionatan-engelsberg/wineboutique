@@ -167,3 +167,8 @@ export class CreateProductDTO extends CreateProductBody {
   @IsString()
   imageId!: string;
 }
+
+export class DeleteProductDTO {
+  @IsString()
+  productId!: string;
+}
