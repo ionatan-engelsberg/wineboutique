@@ -150,7 +150,7 @@ export class CreateProductBody {
   @IsString()
   type!: string;
 
-  @Transform((value) => Boolean(value)) // TODO: Delete if when sending it from frontend value is already a boolean value
+  @Transform((value) => value === 'true') // TODO: Delete if when sending it from frontend value is already a boolean value
   @IsBoolean()
   featuredInHome!: boolean;
 

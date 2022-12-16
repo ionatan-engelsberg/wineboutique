@@ -5,6 +5,7 @@ import { Service } from 'typedi';
 import { IncorrectFormatError } from '../errors/base.error';
 import { MulterFile } from '../dto/Multer.dto';
 import { MULTER_AVAILABLE_FILETYPES, MULTER_MAX_FILE_SIZE_IN_MEGABYTES } from '../constants/Multer';
+import { ErrorCodes } from '../constants/ErrorMessages';
 
 @Service({ transient: true })
 export class MulterService {
@@ -25,7 +26,11 @@ export class MulterService {
       const errorDescription = 'Incorrect file mimetype';
 
       throw new IncorrectFormatError(errorDescription, [
-        { type: mimetype, allowedTypes: MULTER_AVAILABLE_FILETYPES }
+        {
+          type: mimetype,
+          allowedTypes: MULTER_AVAILABLE_FILETYPES,
+          code: ErrorCodes.INVALID_MIMETYPE
+        }
       ]);
     }
   }
@@ -37,7 +42,11 @@ export class MulterService {
 
     if (fileMegaBytes > MULTER_MAX_FILE_SIZE_IN_MEGABYTES) {
       throw new IncorrectFormatError(`File size exceeded limits`, [
-        { filesize: file.size, maxFileSize: MULTER_MAX_FILE_SIZE_IN_MEGABYTES }
+        {
+          filesize: file.size,
+          maxFileSize: MULTER_MAX_FILE_SIZE_IN_MEGABYTES,
+          code: ErrorCodes.MAX_SIZE_EXCEEDED
+        }
       ]);
     }
   }

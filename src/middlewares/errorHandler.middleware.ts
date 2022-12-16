@@ -12,8 +12,6 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
   error(error: any, _req: Request, res: Response, _next: NextFunction) {
     const { errors } = error;
 
-    console.log('ERROR: ', error);
-
     const status = error.status ?? error.httpCode ?? HttpStatusCode.INTERNAL_SERVER;
     let message = error.message ?? ErrorMessages.INTERNAL_SERVER;
     let { description } = error;
@@ -28,7 +26,7 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
       details = errors[0];
     }
 
-    // TODO
+    // TODO: Send code error to identify it on frontend
     if (error.name === 'MulterError') {
       // TODO: Check more multer errors?
       description = 'There has been an error while uploading requested files';

@@ -32,8 +32,8 @@ import { Product, Special } from '../interfaces';
 import { SpecialCategory } from '../types/Special.types';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
-const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -outlined';
-const ROLE_USER_SELECT_FIELDS = '';
+const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -imageId';
+const ROLE_USER_SELECT_FIELDS = '-imageId';
 const OIL_TYPE = 'OIL';
 const DISTILLED_TYPE = 'DISTILLED';
 
@@ -366,7 +366,6 @@ export class ProductService {
 
   async createProduct(product: Product) {
     await this.validateExistingProduct(product);
-
     product = this.getParsedProduct(product);
 
     return this._productRepository.create(product);
@@ -454,17 +453,123 @@ export class ProductService {
 
   async updateProductsMassively(filename: string) {
     const excelProducts = this._excelService.importProductsExcel(filename);
+    return this.createProductsAndGetProblems(excelProducts);
+  }
 
+  // TODO: Temporal => DELETE
+  private async createProductsAndGetProblems(excelProducts: ParsedExcelProduct[]) {
     let problems: ImportedExcelProblems = { name: [], brand: [], grape: [], image: [], type: [] };
     const products: Product[] = [];
 
-    const images: string[] = [];
+    let brands: string[] = [];
+    let types: string[] = [];
+    let grapes: string[] = [];
 
     let i = 0;
 
-    return { problems, products };
+    excelProducts.forEach((prod: ParsedExcelProduct) => {
+      let { name, brand, type, grape, image } = prod;
+
+      if (brand) {
+        brand = this.getBrand(brand);
+      }
+      if (grape) {
+        grape = this.getGrape(grape);
+      } else {
+        grape = DISTILLED_TYPE;
+      }
+      if (type) {
+        type = this.getType(type);
+      }
+      const category = this.getCategory(type);
+
+      const product: Product = {
+        name,
+        brand,
+        type,
+        grape,
+        image,
+        stock: i,
+        price: i * 10,
+        featuredInHome: i * 50 === 0,
+        category
+      };
+      products.push(product);
+
+      if (!name || !brand || !type || !grape || !image) {
+        problems = this.getImportedExcelProblem(problems, prod);
+      }
+
+      if (brand) {
+        brands.push(brand);
+      }
+      if (type) {
+        types.push(type);
+      }
+      if (grape) {
+        grapes.push(grape);
+      }
+
+      i += 1;
+    });
+
+    brands = [...new Set(brands)];
+    types = [...new Set(types)];
+    grapes = [...new Set(grapes)];
+
+    const createProblems: Product[] = [];
+    let j = 0;
+    for (const product of products) {
+      try {
+        await this._productRepository.create(product);
+      } catch (error) {
+        console.log('PROBLEMA: ', j);
+        createProblems.push(product);
+      }
+      j += 1;
+    }
+
+    return { createProblems, problems, sets: { brands, types, grapes } };
   }
 
+  // TODO: Temporal => DELETE
+  private getBrand(brand: string) {
+    return brand.toUpperCase();
+  }
+  // TODO: Temporal => DELETE
+  private getGrape(grape: string) {
+    grape = grape.toUpperCase();
+    if (grape == 'PICUAL' || grape == 'CORATINA' || grape == 'CHANGLOT' || grape == 'GENOVESA') {
+      return OIL_TYPE;
+    }
+
+    return grape.toUpperCase();
+  }
+  // TODO: Temporal => DELETE
+  private getType(type) {
+    if (type.startsWith('Vino')) {
+      return type.replace('Vino ', '').toUpperCase();
+    }
+    if (type.startsWith('Aceite')) {
+      return OIL_TYPE;
+    }
+    if (type === 'Whisky' || type === 'Cognac' || type === 'Grapa') {
+      return DISTILLED_TYPE;
+    }
+
+    return type.toUpperCase();
+  }
+  // TODO: Temporal => DELETE
+  private getCategory(type) {
+    if (type === DISTILLED_TYPE) {
+      return ProductCategory.DISTILLED;
+    }
+    if (type === OIL_TYPE) {
+      return ProductCategory.OIL;
+    }
+    return ProductCategory.WINE;
+  }
+  // TODO: Temporal => DELETE
   private getImportedExcelProblem(problems: ImportedExcelProblems, product: ParsedExcelProduct) {
     const { name, brand, grape, type, image } = product;
 
@@ -489,32 +594,5 @@ export class ProductService {
     }
 
     return problems;
-  }
-
-  private getProductToCreate(product: ParsedExcelProduct, i: number) {
-    const { name, image } = product;
-
-    const price = 10 * i;
-    const stock = i;
-    const featuredInHome = i % 15 === 0;
-
-    const type = this.getFormattedType(product.type);
-    const brand = product.brand.toUpperCase().trim();
-    const grape = product.grape?.toUpperCase().trim();
-
-    return { name, type, brand, grape, price, stock, featuredInHome, image } as Product;
-  }
-
-  private getFormattedType(type: string) {
-    type = type.trim().toUpperCase();
-
-    if (type.startsWith('VINO ')) {
-      return type.replace('VINO ', '');
-    }
-    if (type.startsWith('ACEITE')) {
-      return 'ACEITE';
-    }
-
-    return type;
   }
 }

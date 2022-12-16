@@ -14,7 +14,6 @@ export const ProductSchema = new Schema<Product>(
     },
     description: {
       type: String,
-      required: [true, 'Product description is required'],
       trim: true
       // TODO: Max length
     },
@@ -23,9 +22,10 @@ export const ProductSchema = new Schema<Product>(
       required: [true, 'Product price is required'],
       min: 0
     },
+    // TODO: Not required
     brand: {
       type: String,
-      required: [true, 'Product brand is required'],
+      // required: [true, 'Product brand is required'],
       trim: true,
       uppercase: true
     },
