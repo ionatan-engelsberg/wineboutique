@@ -1,8 +1,10 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsEnum,
+  IsInt,
   IsNumber,
   IsObject,
   IsOptional,
@@ -45,15 +47,21 @@ export class CreateOrderPayer {
 }
 
 export class CreateOrderShipmentAddress {
+  @IsInt()
+  postalCode!: number;
+
   @IsEnum(OrderAddressCity)
   city!: OrderAddressCity;
 
+  @IsOptional() // TODO: Delete
   @IsString()
   locality!: string;
 
+  @IsOptional() // TODO: Delete
   @IsString()
   street!: string;
 
+  @IsOptional() // TODO: Delete
   @IsString()
   number!: string;
 
@@ -66,7 +74,7 @@ export class CreateOrderShipmentAddress {
   apartment!: string;
 }
 
-export class CreateOrderShipment {
+export class OrderShipment {
   @IsBoolean()
   shipment!: boolean;
 
@@ -83,16 +91,19 @@ export class CreateOrderBody {
   @Type(() => CreateOrderItem)
   items!: CreateOrderItem[];
 
+  @IsOptional() // TODO: Delete
   @IsObject()
   @ValidateNested()
   @Type(() => CreateOrderPayer)
   payer!: CreateOrderPayer;
 
+  @IsOptional() // TODO: Delete
   @IsObject()
   @ValidateNested()
-  @Type(() => CreateOrderShipment)
-  shipment!: CreateOrderShipment;
+  @Type(() => OrderShipment)
+  shipment!: OrderShipment;
 
+  @IsOptional() // TODO: Delete
   @IsEnum(OrderPaymentMethod)
   paymentMethod!: OrderPaymentMethod;
 }
@@ -100,4 +111,19 @@ export class CreateOrderBody {
 export class CreateOrderDTO extends CreateOrderBody {
   @IsObject()
   userJWT!: UserJWT;
+}
+
+export class GetOrderShippingFeeDTO {
+  @IsBoolean()
+  shipment!: boolean;
+
+  @Transform((value) => Number(value))
+  @IsInt()
+  postalCode!: number;
+
+  @Transform((value) => value[0].split(',').map((val: string) => val.trim()))
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  productIds!: string[];
 }

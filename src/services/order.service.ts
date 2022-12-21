@@ -12,12 +12,14 @@ import { IncorrectFormatError } from '../errors/base.error';
 
 import { EmailService } from './email.service';
 import { ModoService } from './modo.service';
+import { AndreaniService } from './andreani.service';
 
 import { OrderRepository } from '../repositories/order.repository';
 import { ProductRepository } from '../repositories/product.repository';
 
 import { Order, OrderItem, OrderPayer, User } from '../interfaces';
 import {
+  GetOrderShippingFee,
   OrderAddressCity,
   OrderPaymentMethod,
   OrderProduct,
@@ -25,16 +27,31 @@ import {
   OrderStatus,
   OrderTaxStatus
 } from '../types/Order.types';
+import { ObjectId } from '../types/ObjectId';
 
 @Service({ transient: true })
 export class OrderService {
   constructor(
     private readonly _emailService: EmailService,
     private readonly _modoService: ModoService,
+    private readonly _andreaniService: AndreaniService,
 
     private readonly _orderRepository: OrderRepository,
     private readonly _productRepository: ProductRepository
   ) {}
+
+  async getShippingFee(orderShipment: GetOrderShippingFee, productIds: ObjectId[]) {
+    const { shipment, postalCode } = orderShipment;
+
+    if (!shipment || !postalCode) {
+      return 0;
+    }
+
+    const query = { _id: { $in: productIds } };
+    const products = await this._productRepository.findMany(query);
+
+    return this._andreaniService.getShippingFee(products, postalCode);
+  }
 
   async createOrder(
     user: User,
@@ -43,39 +60,34 @@ export class OrderService {
     shipment: OrderShipment,
     paymentMethod: OrderPaymentMethod
   ) {
-    this.validateOrderPayer(orderPayer);
+    // this.validateOrderPayer(orderPayer);
 
-    const { items, subtotal } = await this.createOrderItems(orderItems);
-    const shippingFee = this.getShippingFee(shipment, subtotal);
+    // const { items, subtotal } = await this.createOrderItems(orderItems);
+    // const shippingFee = this.getShippingFee(shipment, subtotal);
+    // const discountSubtotal = subtotal + shippingFee;
+    // const discount = this.getDiscount(paymentMethod, discountSubtotal);
+    // const total = subtotal + shippingFee - discount;
+    // const orderNumber = this.getOrderNumber();
+    // const securityCode = this.getSecurityCode();
 
-    const discountSubtotal = subtotal + shippingFee;
-    const discount = this.getDiscount(paymentMethod, discountSubtotal);
-
-    const total = subtotal + shippingFee - discount;
-
-    const orderNumber = this.getOrderNumber();
-    const securityCode = this.getSecurityCode();
-
-    const newOrder = {
-      user: user._id!,
-      payer: orderPayer,
-      items,
-      subtotal,
-      shippingFee,
-      discount,
-      total,
-      orderNumber,
-      securityCode,
-      paymentMethod,
-      shipment: shipment.shipment,
-      address: shipment.address,
-      status: OrderStatus.PENDING
-    } as Order;
-
-    await this.createOrderAndUpdateProducts(newOrder);
-    await this._emailService.sendNewOrderEmailToAdmin(user, newOrder);
-    await this._emailService.sendNewOrderEmailToCustomer(user, newOrder);
-
+    // const newOrder = {
+    //   user: user._id!,
+    //   payer: orderPayer,
+    //   items,
+    //   subtotal,
+    //   shippingFee,
+    //   discount,
+    //   total,
+    //   orderNumber,
+    //   securityCode,
+    //   paymentMethod,
+    //   shipment: shipment.shipment,
+    //   address: shipment.address,
+    //   status: OrderStatus.PENDING
+    // } as Order;
+    // await this.createOrderAndUpdateProducts(newOrder);
+    // await this._emailService.sendNewOrderEmailToAdmin(user, newOrder);
+    // await this._emailService.sendNewOrderEmailToCustomer(user, newOrder);
     // TODO: Payment Gateway
   }
 
@@ -112,33 +124,6 @@ export class OrderService {
     }
 
     return { subtotal, items };
-  }
-
-  private getShippingFee(orderShipment: OrderShipment, subtotal: number) {
-    const { shipment, address } = orderShipment;
-
-    if (!shipment || !address) {
-      return 0;
-    }
-
-    const { city } = address;
-
-    switch (city) {
-      case OrderAddressCity.CABA: {
-        if (subtotal >= CABA_FREE_SHIPPING_MIN_SUBTOTAL_REQUIRED) {
-          return 0;
-        }
-        return CABA_SHIPPING_FEE;
-      }
-      case OrderAddressCity.BUENOS_AIRES: {
-        if (subtotal >= BUENOS_AIRES_FREE_SHIPPING_MIN_SUBTOTAL_REQUIRED) {
-          return 0;
-        }
-        return BUENOS_AIRES_SHIPPING_FEE;
-      }
-      default:
-        throw new IncorrectFormatError(`Incorrect address city: ${city}`);
-    }
   }
 
   private getDiscount(paymentMethod: OrderPaymentMethod, subtotal: number) {

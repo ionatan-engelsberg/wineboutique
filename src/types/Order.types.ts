@@ -37,3 +37,9 @@ export interface OrderShipment {
 
   address?: OrderAddress;
 }
+
+export interface GetOrderShippingFee {
+  shipment: boolean;
+
+  postalCode?: number;
+}

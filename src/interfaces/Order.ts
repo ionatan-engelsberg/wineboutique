@@ -31,6 +31,8 @@ export interface OrderItem {
 }
 
 export interface OrderAddress {
+  postalCode: number;
+
   city: OrderAddressCity;
 
   locality: string;

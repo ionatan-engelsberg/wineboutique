@@ -25,4 +25,9 @@ export interface Product {
   imageId?: string;
 
   category: ProductCategory;
+
+  // TODO
+  weight?: number;
+
+  volume?: number;
 }

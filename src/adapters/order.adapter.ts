@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import { CreateOrderDTO } from '../dto/Order.dto';
+import { CreateOrderDTO, GetOrderShippingFeeDTO } from '../dto/Order.dto';
 
 import { OrderService } from '../services/order.service';
 import { UserService } from '../services/user.service';
@@ -18,5 +18,12 @@ export class OrderAdapter {
     const user = await this._userService.findById(userId);
 
     return this._orderService.createOrder(user, payer, items, shipment, paymentMethod);
+  }
+
+  async getOrderShippingFee(dto: GetOrderShippingFeeDTO) {
+    const { shipment: shipmentBoolean, postalCode, productIds } = dto;
+    const shipment = { shipment: shipmentBoolean, postalCode };
+
+    return this._orderService.getShippingFee(shipment, productIds);
   }
 }
