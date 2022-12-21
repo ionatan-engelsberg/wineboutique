@@ -23,6 +23,7 @@ export class CreateOrderItem {
   amount!: number;
 }
 
+// TODO: Take into account Specials
 export class CreateOrderPayer {
   @IsString()
   // TODO: Max length
