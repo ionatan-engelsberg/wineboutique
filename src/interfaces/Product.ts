@@ -26,8 +26,7 @@ export interface Product {
 
   category: ProductCategory;
 
-  // TODO
-  weight?: number;
+  weight: number;
 
-  volume?: number;
+  volume: number;
 }

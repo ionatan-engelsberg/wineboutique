@@ -75,20 +75,14 @@ export class ProductAdapter {
   }
 
   async updateProduct(dto: UpdateProductDTO) {
-    const { productId, name, description, price, featuredInHome, stock, image, imageId } = dto;
+    const { productId, ...newProduct } = dto;
 
     const oldProduct = await this._productService.findById(productId);
     const { category, brand, grape, type } = oldProduct;
 
     const updatedProduct = {
       _id: oldProduct._id,
-      name,
-      description,
-      price,
-      featuredInHome,
-      stock,
-      image,
-      imageId,
+      ...newProduct,
       category,
       brand,
       grape,

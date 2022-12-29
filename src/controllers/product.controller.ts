@@ -55,6 +55,7 @@ export class ProductController {
     private readonly _cloudinaryAdapter: CloudinaryAdapter
   ) {}
 
+  // TODO: Delete
   @Post('/test')
   async createTestProducts() {
     await this._productAdapter.createTestProducts();

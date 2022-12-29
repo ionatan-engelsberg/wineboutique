@@ -32,8 +32,9 @@ import { Product, Special } from '../interfaces';
 import { SpecialCategory } from '../types/Special.types';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
-const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -imageId';
-const ROLE_USER_SELECT_FIELDS = '-imageId';
+const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -imageId -weight -volume';
+const ROLE_USER_SELECT_FIELDS = '-imageId -weight -volume';
+
 const OIL_TYPE = 'OIL';
 const DISTILLED_TYPE = 'DISTILLED';
 
@@ -81,7 +82,9 @@ export class ProductService {
         type,
         featuredInHome,
         stock,
-        category
+        category,
+        volume: i,
+        weight: i
       };
 
       await this._productRepository.create(product);
@@ -492,7 +495,9 @@ export class ProductService {
         stock: i,
         price: i * 10,
         featuredInHome: i * 50 === 0,
-        category
+        category,
+        weight: i,
+        volume: i
       };
       products.push(product);
 

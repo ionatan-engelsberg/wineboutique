@@ -67,6 +67,16 @@ export const ProductSchema = new Schema<Product>(
     imageId: {
       type: String,
       default: null
+    },
+    weight: {
+      type: Number,
+      required: [true, 'Product weight is required'],
+      min: 0
+    },
+    volume: {
+      type: Number,
+      required: [true, 'Product volume is required'],
+      min: 0
     }
   },
   { versionKey: false }

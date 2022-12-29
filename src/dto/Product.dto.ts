@@ -158,6 +158,16 @@ export class CreateProductBody {
   @IsInt()
   @Min(0)
   stock!: number;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsInt()
+  @Min(0)
+  weight!: number;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsInt()
+  @Min(0)
+  volume!: number;
 }
 
 export class CreateProductDTO extends CreateProductBody {
@@ -194,6 +204,16 @@ export class UpdateProductBody {
   @IsInt()
   @Min(0)
   stock!: number;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsInt()
+  @Min(0)
+  weight!: number;
+
+  @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
+  @IsInt()
+  @Min(0)
+  volume!: number;
 }
 
 export class UpdateProductDTO extends UpdateProductBody {
