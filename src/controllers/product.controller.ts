@@ -157,7 +157,8 @@ export class ProductController {
   @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
   @Put('/:productId')
   @OnUndefined(HttpStatusCode.NO_CONTENT)
-  async updateProduct(
+  @UseAfter(emptyUploadsDirectory)
+  async updateProduct(  
     @CurrentUser() userJWT: UserJWT,
     @Param('productId') productId: string,
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: UpdateProductBody,

@@ -191,12 +191,23 @@ export class UpdateProductBody {
   @IsString()
   description?: string;
 
+  @IsString()
+  brand!: string;
+
+  @ValidateIf((body) => body.category === ProductCategory.WINE)
+  @IsString()
+  grape!: string;
+
+  @ValidateIf((body) => body.category === ProductCategory.WINE)
+  @IsString()
+  type!: string;
+
   @Transform((value) => Number(value)) // TODO: Delete if when sending it from frontend value is already a number
   @IsNumber()
   @Min(0)
   price!: number;
 
-  @Transform((value) => Boolean(value)) // TODO: Delete if when sending it from frontend value is already a boolean value
+  @Transform((value) => value === 'true') // TODO: Delete if when sending it from frontend value is already a boolean value
   @IsBoolean()
   featuredInHome!: boolean;
 

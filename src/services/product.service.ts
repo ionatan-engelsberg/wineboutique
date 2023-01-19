@@ -33,7 +33,7 @@ import { SpecialCategory } from '../types/Special.types';
 
 const DEFAULT_GET_PRODUCTS_LIMIT = 12;
 const DEFAULT_SELECT_FIELDS = '-description -featuredInHome -imageId -weight -volume';
-const ROLE_USER_SELECT_FIELDS = '-imageId -weight -volume';
+const ROLE_USER_SELECT_FIELDS = '-imageId';
 
 const OIL_TYPE = 'OIL';
 const DISTILLED_TYPE = 'DISTILLED';
