@@ -4,11 +4,16 @@
   "description": "API for Wine Boutique",
   "main": "app.ts",
   "scripts": {
-    "start": "tsc && node ./dist/src/server.js",
+    "start": "node dist/app.js",
     "watch": "tsc -w --noemit",
     "dev": "nodemon src/server.ts",
     "lint": "eslint \"src/**\" --color && tsc --noemit",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+
+    "postinstall": "tsc",
+    "watch-node": "nodemon dist/app.js",
+    "watch-ts": "tsc -w",
+    "deploy": "git add . && git commit -m Heroku && git push heroku master"
   },
   "author": "",
   "license": "ISC",
@@ -48,5 +53,8 @@
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.8.4"
+  },
+  "engines": {
+    "node": "16.15.1"
   }
 }
