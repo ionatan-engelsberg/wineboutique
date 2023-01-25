@@ -2,10 +2,11 @@ import { config } from 'dotenv';
 
 config();
 
-if (!process.env.PORT) {
-  console.error('No PORT provided');
-  process.exit(1);
-}
+// TODO: See why this was present
+// if (!process.env.PORT) {
+//   console.error('No PORT provided');
+//   process.exit(1);
+// }
 
 if (!process.env.MONGODB_USERNAME || !process.env.MONGODB_PASSWORD) {
   console.error('==> No MONGO specification provided');
