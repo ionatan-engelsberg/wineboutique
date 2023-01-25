@@ -4,7 +4,7 @@
   "description": "API for Wine Boutique",
   "main": "app.ts",
   "scripts": {
-    "start": "node dist/app.js",
+    "start": "node dist/src/app.js",
     "watch": "tsc -w --noemit",
     "dev": "nodemon src/server.ts",
     "lint": "eslint \"src/**\" --color && tsc --noemit",
