@@ -11,7 +11,7 @@
     "build": "tsc -p .",
 
     "postinstall": "tsc",
-    "watch-node": "nodemon dist/app.js",
+    "watch-node": "nodemon dist/src/app.js",
     "watch-ts": "tsc -w",
     "deploy": "git add . && git commit -m Heroku && git push heroku master"
   },
