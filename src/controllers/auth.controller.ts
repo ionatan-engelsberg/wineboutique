@@ -11,7 +11,7 @@ import {
   Res
 } from 'routing-controllers';
 
-import { AuthAdapter } from '../adapters/auth.adapter-test';
+import { AuthAdapter } from '../adapters/auth.adapter';
 
 import {
   ForgotPasswordDTO,
