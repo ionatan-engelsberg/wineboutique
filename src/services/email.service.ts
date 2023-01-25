@@ -1,5 +1,5 @@
 import { Service } from 'typedi';
-import nodemailer from 'nodemailer';
+// import nodemailer from 'nodemailer';
 
 import { InternalServerError } from '../errors/base.error';
 
@@ -24,18 +24,21 @@ export class EmailService {
 
   private async sendEmail(to: string, from: string, subject: string, html: any) {
     // TODO: Temporal. Change for Sendgrid on production
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: ETHEREAL_USERNAME,
-        pass: ETHEREAL_PASSWORD
-      }
-    });
+    
+    // const transporter = nodemailer.createTransport({
+    //   host: 'smtp.ethereal.email',
+    //   port: 587,
+    //   secure: false,
+    //   auth: {
+    //     user: ETHEREAL_USERNAME,
+    //     pass: ETHEREAL_PASSWORD
+    //   }
+    // });
 
-    const info = await transporter.sendMail({ from, to: TEST_USER_EMAIL, subject, html });
-    console.log('TODO - MESSAGE URL: ', nodemailer.getTestMessageUrl(info));
+    // const info = await transporter.sendMail({ from, to: TEST_USER_EMAIL, subject, html });
+    // console.log('TODO - MESSAGE URL: ', nodemailer.getTestMessageUrl(info));
+
+    console.log('EMAIL SENT')
   }
 
   async sendContactEmail(
