@@ -4,13 +4,13 @@
   "description": "API for Wine Boutique",
   "main": "app.ts",
   "scripts": {
-    "start": "node dist/src/app.js",
+    "start": "node dist/src/server.js",
     "watch": "tsc -w --noemit",
     "dev": "nodemon src/server.ts",
     "lint": "eslint \"src/**\" --color && tsc --noemit",
     "build": "tsc -p .",
     "postinstall": "tsc",
-    "watch-node": "nodemon dist/src/app.js",
+    "watch-node": "nodemon dist/src/server.js",
     "watch-ts": "tsc -w",
     "deploy": "git add . && git commit -m Heroku && git push heroku master"
   },
