@@ -2,7 +2,7 @@ import { Service } from 'typedi';
 import jwt from 'jsonwebtoken';
 import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 
-import { JWT_LIFETIME, JWT_SECRET, ENV } from '../config/config';
+import { JWT_LIFETIME, JWT_SECRET, ENV, WEB_URL } from '../config/config';
 import { InternalServerError, UnauthorizedError } from '../errors/base.error';
 
 import { User } from '../interfaces';
@@ -66,13 +66,15 @@ export class CredentialsService {
             expires: expirationDate,
             secure: true,
             signed: true,
-            sameSite: 'Lax'
+            sameSite: 'Lax',
+            domain: WEB_URL
           }
         : {
             httpOnly: false,
             secure: false,
             expires: expirationDate,
-            signed: true
+            signed: true,
+            domain: WEB_URL
           };
 
     return { token, cookieOptions };
