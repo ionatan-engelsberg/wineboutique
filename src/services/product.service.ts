@@ -102,8 +102,10 @@ export class ProductService {
     const sort = GetProductsParsedSort[receivedSort];
     const limit = DEFAULT_GET_PRODUCTS_LIMIT;
     const offset = (page - 1) * limit;
-    const selectFields =
-      user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+    // TODO: Discomment
+    // const selectFields =
+    // user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+    const selectFields = ROLE_USER_SELECT_FIELDS;
 
     const filters = this.getFilters(filterParams as GetProductsFilters);
     const { total, withStock } = await this.getProductsCount(filters);
@@ -306,8 +308,10 @@ export class ProductService {
   }
 
   async getProductById(productId: ObjectId, user?: UserJWT) {
-    const selectFields =
-      user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+    // TODO: Discomment
+    // const selectFields =
+    //   user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+    const selectFields = ROLE_USER_SELECT_FIELDS;
 
     return this._productRepository.findById(productId, selectFields);
   }
@@ -358,8 +362,10 @@ export class ProductService {
   }
 
   async getFeaturedProducts(filters: GetFeaturedProductsFilters, user?: UserJWT) {
-    const selectFields =
-      user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+    // TODO: Discomment
+    // const selectFields =
+    //   user && user.role !== UserRole.USER ? ROLE_USER_SELECT_FIELDS : DEFAULT_SELECT_FIELDS;
+    const selectFields = ROLE_USER_SELECT_FIELDS;
     const options = { fields: selectFields };
 
     const parsedFilters = { ...filters, stock: { $gt: 0 } };
