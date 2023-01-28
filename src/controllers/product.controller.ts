@@ -110,14 +110,16 @@ export class ProductController {
     return this._productAdapter.getProductById(dto);
   }
 
-  @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
+  // TODO: Discomment
+  // @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
   @Post()
   @OnUndefined(HttpStatusCode.CREATED)
   @UseAfter(emptyUploadsDirectory)
   async createProduct(
     @UploadedFile('image', { required: true, options: multerOptions }) file: MulterFile,
-    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: CreateProductBody,
-    @CurrentUser() userJWT: UserJWT
+    @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: CreateProductBody
+    // TODO: Discomment
+    // @CurrentUser() userJWT: UserJWT
   ) {
     let image: string;
     let imageId: string | null = null;
@@ -146,20 +148,25 @@ export class ProductController {
     }
   }
 
-  @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
+  // TODO: Discomment
+  // @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
   @Delete('/:productId')
   @OnUndefined(HttpStatusCode.OK)
-  async deleteProduct(@CurrentUser() userJWT: UserJWT, @Param('productId') productId: string) {
+  // TODO: Discomment
+  // async deleteProduct(@CurrentUser() userJWT: UserJWT, @Param('productId') productId: string) {
+  async deleteProduct(@Param('productId') productId: string) {
     const dto: DeleteProductDTO = { productId };
     await this._productAdapter.deleteProduct(dto);
   }
 
-  @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
+  // TODO: Discomment
+  // @Authorized([UserRole.ADMIN, UserRole.COFOUNDER, UserRole.OWNER])
   @Put('/:productId')
   @OnUndefined(HttpStatusCode.NO_CONTENT)
   @UseAfter(emptyUploadsDirectory)
-  async updateProduct(  
-    @CurrentUser() userJWT: UserJWT,
+  async updateProduct(
+    // TODO: Discomment
+    // @CurrentUser() userJWT: UserJWT,
     @Param('productId') productId: string,
     @Body({ validate: { whitelist: true, forbidNonWhitelisted: true } }) body: UpdateProductBody,
     @UploadedFile('image', { required: false, options: multerOptions }) file: MulterFile
