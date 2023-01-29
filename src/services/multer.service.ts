@@ -1,5 +1,5 @@
 import multer from 'multer';
-import path from 'path';
+import fs from 'fs';
 import { Service } from 'typedi';
 
 import { IncorrectFormatError } from '../errors/base.error';
@@ -13,7 +13,14 @@ export class MulterService {
 
   private static storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, `${__dirname}/../../uploads`);
+      const destinationDirectory = `${__dirname}/../../uploads`;
+      const existsDirectory = fs.existsSync(destinationDirectory);
+
+      if (!existsDirectory) {
+        fs.mkdirSync(destinationDirectory);
+      }
+
+      cb(null, destinationDirectory);
     },
     filename: (req, file, cb) => {
       const filename = file.originalname.split(' ').join('_');
