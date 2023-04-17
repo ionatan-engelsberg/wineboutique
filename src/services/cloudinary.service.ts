@@ -11,6 +11,7 @@ cloudinary.config({
   api_secret: CLOUDINARY_API_SECRET
 });
 
+const CLOUDINARY_UPLOAD_DIRECTORY = 'wineboutique';
 const uploadsSource = `${__dirname}/../../uploads`;
 
 @Service({ transient: true })
@@ -18,8 +19,11 @@ export class CloudinaryService {
   constructor() {}
 
   async uploadImage(filename: string, folder: CloudinaryFolder) {
-    const upload = await cloudinary.uploader.upload(`${uploadsSource}/${filename}`, {
-      folder: `wineboutique/${folder}`
+    const localUploadDirectory = `${uploadsSource}/${filename}`;
+    const cloudinaryFolder = `${CLOUDINARY_UPLOAD_DIRECTORY}/${folder}`;
+
+    const upload = await cloudinary.uploader.upload(localUploadDirectory, {
+      folder: cloudinaryFolder
     });
 
     const { url, public_id: imageId } = upload;

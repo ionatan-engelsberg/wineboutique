@@ -24,7 +24,7 @@ export class AuthAdapter {
       firstName,
       lastName,
       email,
-      birthdate: new Date(Date.now()), // TODO
+      birthdate: new Date(Date.now()), // TODO: This isn't done because I can't validate birthdates yet. Once "@IsOlderThan18()" exists in dto/Auth.dto.ts, the birthdate used to create the User must be that one from de DTO.
       password,
       phoneNumber,
       isActive: true,

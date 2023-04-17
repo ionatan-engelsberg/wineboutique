@@ -45,7 +45,6 @@ export class LoginDTO {
 }
 
 export class ForgotPasswordDTO {
-  // TODO: IsEmail()?
   @IsEmail()
   email!: string;
 }

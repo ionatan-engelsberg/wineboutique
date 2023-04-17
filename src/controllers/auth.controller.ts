@@ -49,7 +49,7 @@ export class AuthController {
     return { name, userId, isAuthorized };
   }
 
-  // TODO
+  // TODO: Search on Internet if clearing the cookie is the only thing I should do, or I should do anything else
   @Post('/logout')
   @OnUndefined(HttpStatusCode.OK)
   logout(@Res() res: any) {

@@ -95,6 +95,7 @@ export class AuthService {
     try {
       user = await this.validateForgotPassword(email);
     } catch (error) {
+      // TODO: If this error is deleted, return the function here
       throw new NotFoundError(`User with email ${email} does not exist`);
     }
 
@@ -137,10 +138,7 @@ export class AuthService {
 
       user = await this._userRepository.findById(userId);
 
-      const { isActive } = user;
-
-      const userValidationsOK = isActive;
-      if (!userValidationsOK) {
+      if (!user.isActive) {
         throw new NotFoundError('Incorrect link');
       }
 
@@ -155,6 +153,7 @@ export class AuthService {
       throw new NotFoundError('Incorrect link');
     }
 
+    // TODO: Filter returned info if called from frontend
     return user;
   }
 

@@ -70,7 +70,7 @@ export class EmailService {
       throw new InternalServerError('No email address configured to send an email');
     }
 
-    // TODO
+    // TODO: Create a good subject to send this email
     const subject = 'Reset password';
     const hashedResetPasswordInfo = await this._credentialsService.createResetPasswordToken(
       userId! as string,

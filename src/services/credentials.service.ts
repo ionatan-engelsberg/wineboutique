@@ -19,6 +19,7 @@ const JWT_VALIDATION_TIME = 6 * MILISECONDS_IN_ONE_HOUR;
 export class CredentialsService {
   constructor() {}
 
+  // NOTE: copied from Torem
   private createToken(data: any, secret: string, expirationTime: string): Promise<string> {
     return new Promise((resolve, reject) => {
       try {
@@ -30,6 +31,7 @@ export class CredentialsService {
     });
   }
 
+  // NOTE: copied from Torem
   async decodeJWT(token: string): Promise<any | null> {
     return new Promise((resolve, reject) => {
       try {
