@@ -3,7 +3,7 @@ import { Service } from 'typedi';
 import { Middleware, ExpressErrorMiddlewareInterface } from 'routing-controllers';
 
 import { HttpStatusCode } from '../constants/HttpStatusCodes';
-import { ErrorMessages, ErrorDescriptions, ErrorCodes } from '../constants/ErrorMessages';
+import { ErrorMessages } from '../constants/ErrorMessages';
 
 // TODO: Check which errors I am using
 @Middleware({ type: 'after' })
@@ -11,7 +11,6 @@ import { ErrorMessages, ErrorDescriptions, ErrorCodes } from '../constants/Error
 export class ErrorHandler implements ExpressErrorMiddlewareInterface {
   error(error: any, _req: Request, res: Response, _next: NextFunction) {
     const { errors } = error;
-    console.log('ERROR: ', error);
 
     const status = error.status ?? error.httpCode ?? HttpStatusCode.INTERNAL_SERVER;
     let message = error.message ?? ErrorMessages.INTERNAL_SERVER;
@@ -25,6 +24,7 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
       description =
         'Some properties are either missing or incorrect. Check all required values are included and in a correct format';
       details = errors[0];
+      details.code = details?.constraints?.code
     }
 
     // TODO: Send code error to identify it on frontend
@@ -33,7 +33,7 @@ export class ErrorHandler implements ExpressErrorMiddlewareInterface {
       description = 'There has been an error while uploading requested files';
     }
 
-    // TODO
+    // TODO: Copied from Torem
     try {
       res.status(status).json({ message, description: description!, details: details! });
     } catch (err: any) {

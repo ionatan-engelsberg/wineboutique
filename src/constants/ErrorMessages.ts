@@ -13,14 +13,6 @@ export enum DatabaseErrorMessages {
   COULD_NOT_SAVE = 'Could not save requested entity. Please try again'
 }
 
-// TODO
-export const ErrorDescriptions = {
-  0: 'Password must contain at least one letter and one number',
-  1: 'password and checkPassword do not match',
-  2: 'User must be older than 18 yr old to register',
-  3: 'Value must be a valid enum value'
-};
-
 export enum ErrorCodes {
   PASSWORD_REGEX,
   EQUAL_PASSWORD,

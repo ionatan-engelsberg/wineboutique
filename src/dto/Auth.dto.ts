@@ -1,4 +1,4 @@
-import { IsEmail, IsNumber, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 import { Match } from '../utils/validators/passwordsAreEqual';
 import { ContainsLettersAndNumbers } from '../utils/validators/passwordRegex';
@@ -25,15 +25,18 @@ export class SignUpDTO {
 
   @IsString()
   @ContainsLettersAndNumbers('password')
+  @MinLength(8)
+  @MaxLength(50)
   password!: string;
 
   @IsString()
   @Match('password')
   checkPassword!: string;
 
+  // TODO: Create reggex to make sure that phone number only contains numbers, "-" and "+"
   @IsOptional()
-  @IsNumber()
-  phoneNumber?: number;
+  @IsString()
+  phoneNumber?: string;
 }
 
 export class LoginDTO {

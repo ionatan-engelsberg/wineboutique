@@ -12,7 +12,7 @@ export interface User {
 
   birthdate: Date;
 
-  phoneNumber?: number;
+  phoneNumber?: string;
 
   password: string;
 

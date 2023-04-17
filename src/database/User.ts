@@ -28,7 +28,7 @@ export const UserSchema = new Schema<User>(
       required: [true, 'User birthdate is required']
     },
     phoneNumber: {
-      type: Number
+      type: String
     },
     password: {
       type: String,
