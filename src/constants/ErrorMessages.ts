@@ -16,7 +16,7 @@ export enum DatabaseErrorMessages {
 export enum ErrorCodes {
   PASSWORD_REGEX,
   EQUAL_PASSWORD,
-  BIGGER_THAN_18,
+  OLDER_THAN_18,
   INVALID_VALUE_ENUM,
   INVALID_MIMETYPE,
   MAX_SIZE_EXCEEDED

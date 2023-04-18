@@ -33,6 +33,8 @@ export class AuthService {
   ) {}
 
   async signup(user: User) {
+    let newUser: User;
+
     const { email } = user;
     user.password = this._credentialsService.hashString(user.password);
 
@@ -44,13 +46,18 @@ export class AuthService {
       if (isActive) {
         throw new ConflictError(`User with email ${email} already exists`, [{ userId }]);
       }
+
+      newUser = { ...user, _id: existingUser._id! };
+      await this._userRepository.update(newUser);
     } catch (error: any) {
       if (error.details) {
         throw error;
       }
+
+      newUser = await this._userRepository.create(user);
     }
 
-    const newUser = await this._userRepository.create(user);
+    // TODO: sendWelcomeEmail()
     const cookies = await this._credentialsService.createUserCookies(newUser);
 
     return { ...cookies, user: newUser };

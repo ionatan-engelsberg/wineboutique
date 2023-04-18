@@ -1,7 +1,7 @@
-import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsDate, IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-import { Match } from '../utils/validators/passwordsAreEqual';
-import { ContainsLettersAndNumbers } from '../utils/validators/passwordRegex';
+import { Match, ContainsLettersAndNumbers, IsOlderThan18 } from '../utils/validators';
 
 export class SignUpDTO {
   @IsString()
@@ -17,10 +17,9 @@ export class SignUpDTO {
   @IsEmail()
   email!: string;
 
-  // TODO: min 18yr old
-  @IsString()
-  // @IsDate()
-  // @IsOlderThan18('birthdate')
+  @Transform((value) => new Date(value))
+  @IsDate()
+  @IsOlderThan18('birthdate')
   birthdate!: Date;
 
   @IsString()

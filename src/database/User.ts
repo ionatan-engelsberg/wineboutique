@@ -38,8 +38,7 @@ export const UserSchema = new Schema<User>(
     },
     isActive: {
       type: Boolean,
-      default: false
-      // TODO: Check whether "default: false" is OK. I think it's like this because when first developing the app, users had to verify their accounts when signing up. If verification is omitted, change default to "true".
+      default: true
     },
     resetPasswordToken: {
       type: String,
